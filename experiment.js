@@ -183,19 +183,19 @@
   // STIMULUS LISTS
   // ==================================================
   const FILLER_OBJECTS = [
-    "Bear",
-    "Bird",
+    "bear",
+    "bird",
     "bus",
     "car",
-    "Cookie",
-    "Dog",
-    "Duck",
-    "Fish",
+    "cookie",
+    "dog",
+    "duck",
+    "fish",
     "hat",
     "shoe",
     "spoon",
     "strawberry",
-    "Train",
+    "train",
     "tree"
   ];
 
