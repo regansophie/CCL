@@ -2104,7 +2104,7 @@ const objectNamingConfigs = jsPsych.randomization.shuffle([
         <p>Thank you for participating!</p>
         <p>To receive credit, please click the link below and enter your name.</p>
         <p style="margin-top:20px;">
-          <a href="https://forms.gle/3Vk7e4CqKtZkYok49"
+          <a href="https://forms.gle/wp7LTr9WEMu5fzu5A"
              target="_blank"
              style="color:#ffd166; font-size:26px; text-decoration:underline;">
              → Click here to submit your name for RPP credit ←
