@@ -50,8 +50,8 @@ function getJarSources() {
 // SPEAKER CONDITIONS
 // ==================================================
 const speakerCondition = jsPsych.randomization.sampleWithoutReplacement(
-  // ["same_speaker", "new_same_group", "new_different_group"],
-  ["same_speaker"],
+   ["same_speaker", "new_same_group", "new_different_group"],
+  //["same_speaker"],
   1
 )[0];
 
@@ -208,18 +208,56 @@ function getRandomSide() {
   return Math.random() < 0.5 ? "left" : "right";
 }
 
+// ==================================================
+// AUDIO PATH HELPERS
+// ==================================================
+function getConditionAudioAlienFolder() {
+  if (speakerCondition === "same_speaker") {
+    return "alien_1";
+  }
+
+  if (speakerCondition === "new_same_group") {
+    return "alien_2";
+  }
+
+  if (speakerCondition === "new_different_group") {
+    return "alien_3";
+  }
+
+  throw new Error(`Unknown speaker condition: ${speakerCondition}`);
+}
+
+function getConditionCloudAudio() {
+  if (speakerCondition === "same_speaker") {
+    return "stimuli/audio/intro/cloud_1.mp3";
+  }
+
+  if (speakerCondition === "new_same_group") {
+    return "stimuli/audio/intro/cloud_2.mp3";
+  }
+
+  if (speakerCondition === "new_different_group") {
+    return "stimuli/audio/intro/cloud_3.mp3";
+  }
+
+  throw new Error(`Unknown speaker condition: ${speakerCondition}`);
+}
+
 function getFillerAudioSrc(objectName) {
   if (!objectName) return null;
-  return `stimuli/audio/filler/${objectName.toLowerCase()}.mp3`;
+  const alienFolder = getConditionAudioAlienFolder();
+  return `stimuli/audio/${alienFolder}/filler/${objectName.toLowerCase()}.mp3`;
 }
 
 function getCriticalAudio(targetObject) {
+  const alienFolder = getConditionAudioAlienFolder();
+
   if (targetObject === "starberry") {
-    return "stimuli/audio/target/fruit.mp3";
+    return `stimuli/audio/${alienFolder}/target/fruit.mp3`;
   }
 
   if (targetObject === "rainbow_poofle") {
-    return "stimuli/audio/target/animal.mp3";
+    return `stimuli/audio/${alienFolder}/target/animal.mp3`;
   }
 
   return null;
@@ -282,8 +320,8 @@ const IMAGE_PRELOAD = [
 const AUDIO_PRELOAD = [
   ...FILLER_OBJECTS.map(obj => getFillerAudioSrc(obj)),
 
-  "stimuli/audio/target/fruit.mp3",
-  "stimuli/audio/target/animal.mp3",
+  getCriticalAudio("starberry"),
+  getCriticalAudio("rainbow_poofle"),
 
   "stimuli/audio/intro/intro_1.mp3",
   "stimuli/audio/intro/intro_2.mp3",
@@ -294,7 +332,7 @@ const AUDIO_PRELOAD = [
   "stimuli/audio/intro/intro_jars_2.mp3",
   "stimuli/audio/intro/intro_jars_3.mp3",
 
-  "stimuli/audio/intro/cloud.mp3"
+  getConditionCloudAudio()
 ];
 
 function makePreloadTrial() {
@@ -361,7 +399,7 @@ function setupIntroAudioAndNext(audio) {
   }
 
   if (audio) {
-    disableNext();
+ //   disableNext();
 
     window.currentIntroAudio = new Audio(audio);
     window.currentIntroAudio.addEventListener("ended", enableNext);
@@ -436,13 +474,18 @@ function renderAllAliensIntroScreen({
   text = "",
   showNextButton = true
 } = {}) {
-  const alienImages = [
+  const leftAliens = [
     "images/aliens/alien_green_1.png",
     "images/aliens/alien_green_2.png",
     "images/aliens/alien_green_3.png",
+    "images/aliens/alien_green_4.png"
+  ];
+
+  const rightAliens = [
     "images/aliens/alien_yellow_1.png",
     "images/aliens/alien_yellow_2.png",
-    "images/aliens/alien_yellow_3.png"
+    "images/aliens/alien_yellow_3.png",
+    "images/aliens/alien_yellow_4.png"
   ];
 
   return `
@@ -479,21 +522,45 @@ function renderAllAliensIntroScreen({
         bottom:18%;
         left:50%;
         transform:translateX(-50%);
+        width:88%;
         display:flex;
-        gap:3vw;
+        justify-content:space-between;
         align-items:flex-end;
         z-index:10;
       ">
-        ${alienImages.map(src => `
-          <img
-            src="${src}"
-            style="
-              height:${ALIEN_HEIGHT};
-              object-fit:contain;
-              display:block;
-            "
-          >
-        `).join("")}
+        <div style="
+          display:flex;
+          gap:1.5vw;
+          align-items:flex-end;
+        ">
+          ${leftAliens.map(src => `
+            <img
+              src="${src}"
+              style="
+                height:${ALIEN_HEIGHT};
+                object-fit:contain;
+                display:block;
+              "
+            >
+          `).join("")}
+        </div>
+
+        <div style="
+          display:flex;
+          gap:1.5vw;
+          align-items:flex-end;
+        ">
+          ${rightAliens.map(src => `
+            <img
+              src="${src}"
+              style="
+                height:${ALIEN_HEIGHT};
+                object-fit:contain;
+                display:block;
+              "
+            >
+          `).join("")}
+        </div>
       </div>
 
       ${showNextButton ? `
@@ -624,6 +691,7 @@ function renderAlienObjectIntroScreen({
         "
       >
 
+      <!-- TEXT -->
       <div style="
         position:absolute;
         top:12%;
@@ -640,10 +708,11 @@ function renderAlienObjectIntroScreen({
         ${text}
       </div>
 
+      <!-- OBJECT (centered) -->
       <div style="
         position:absolute;
         left:50%;
-        top:50%;
+        top:48%;
         transform:translate(-50%, -50%);
         z-index:10;
       ">
@@ -660,20 +729,35 @@ function renderAlienObjectIntroScreen({
         ` : ""}
       </div>
 
+      <!-- FIXED BOTTOM LAYOUT (same scale as main scene) -->
       <div style="
         position:absolute;
-        left:8%;
-        bottom:14%;
+        left:50%;
+        bottom:5%;
+        transform:translateX(-50%);
+        width:86%;
+        max-width:1300px;
+        display:flex;
+        justify-content:flex-start;
+        align-items:flex-end;
         z-index:10;
       ">
-        <img
-          src="${alienSrc}"
-          style="
-            height:${ALIEN_HEIGHT};
-            object-fit:contain;
-            display:block;
-          "
-        >
+        <div style="
+          width:18vw;
+          max-width:220px;
+          display:flex;
+          justify-content:center;
+          align-items:flex-end;
+        ">
+          <img
+            src="${alienSrc}"
+            style="
+              height:${ALIEN_HEIGHT};
+              object-fit:contain;
+              display:block;
+            "
+          >
+        </div>
       </div>
 
       ${showNextButton ? `
@@ -1146,8 +1230,15 @@ function renderAlienJarScene({
   const alienSrc = getAlienSrc(alienColor, alienNumber);
   const jars = getJarSources();
 
-  const leftObjectSrc = getObjectSrc(leftObjectType, leftObject);
-  const rightObjectSrc = getObjectSrc(rightObjectType, rightObject);
+  const leftObjectSrc =
+    cloudCoveredSide === "left"
+      ? null
+      : getObjectSrc(leftObjectType, leftObject);
+
+  const rightObjectSrc =
+    cloudCoveredSide === "right"
+      ? null
+      : getObjectSrc(rightObjectType, rightObject);
 
   const leftLabel = jars.left.includes("orange") ? "The orange jar" : "The purple jar";
   const rightLabel = jars.right.includes("orange") ? "The orange jar" : "The purple jar";
@@ -1240,6 +1331,7 @@ function renderAlienJarScene({
         z-index:10;
       ">
 
+        <!-- LEFT JAR -->
         <div style="
           width:22vw;
           max-width:260px;
@@ -1326,6 +1418,7 @@ function renderAlienJarScene({
           ` : ""}
         </div>
 
+        <!-- ALIEN -->
         <div style="
           width:18vw;
           max-width:220px;
@@ -1344,6 +1437,7 @@ function renderAlienJarScene({
           >
         </div>
 
+        <!-- RIGHT JAR -->
         <div style="
           width:22vw;
           max-width:260px;
@@ -1433,7 +1527,6 @@ function renderAlienJarScene({
     </div>
   `;
 }
-
 
 // ==================================================
 // LABEL TEST RENDERER
@@ -2658,7 +2751,7 @@ timeline.push(
     text: "Now a cloud is covering one of the jars.",
     alienColor: TASK_ALIEN.color,
     alienNumber: TASK_ALIEN.number,
-    audio: "stimuli/audio/intro/cloud.mp3"
+    audio: getConditionCloudAudio()
   })
 );
 
