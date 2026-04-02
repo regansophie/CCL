@@ -701,6 +701,121 @@ function renderSingleAlienIntroScreen({
   `;
 }
 
+function renderAlienObjectIntroScreen({
+  text = "",
+  alienColor = "green",
+  alienNumber = 1,
+  objectType = null,
+  objectName = null,
+  showNextButton = true
+} = {}) {
+  const alienSrc = getAlienSrc(alienColor, alienNumber);
+  const objectSrc = getObjectSrc(objectType, objectName);
+
+  return `
+    <div style="position:fixed; inset:0; overflow:hidden;">
+      <img
+        src="images/background.png"
+        style="
+          position:absolute;
+          inset:0;
+          width:100%;
+          height:100%;
+          object-fit:cover;
+        "
+      >
+
+      <div style="
+        position:absolute;
+        top:12%;
+        left:50%;
+        transform:translateX(-50%);
+        width:70%;
+        text-align:center;
+        font-size:3vw;
+        line-height:1.6;
+        color:white;
+        text-shadow:3px 3px 6px rgba(0,0,0,0.7);
+        z-index:10;
+      ">
+        ${text}
+      </div>
+
+      <div style="
+        position:absolute;
+        left:50%;
+        top:48%;
+        transform:translate(-50%, -50%);
+        z-index:10;
+      ">
+        ${objectSrc ? `
+          <img
+            src="${objectSrc}"
+            style="
+              height:28vh;
+              max-width:24vw;
+              object-fit:contain;
+              display:block;
+            "
+          >
+        ` : ""}
+      </div>
+
+      <div style="
+        position:absolute;
+        left:50%;
+        bottom:5%;
+        transform:translateX(-50%);
+        width:86%;
+        max-width:1300px;
+        display:flex;
+        justify-content:flex-start;
+        align-items:flex-end;
+        z-index:10;
+      ">
+        <div style="
+          width:18vw;
+          max-width:220px;
+          display:flex;
+          justify-content:center;
+          align-items:flex-end;
+        ">
+          <img
+            src="${alienSrc}"
+            style="
+              height:${ALIEN_HEIGHT};
+              object-fit:contain;
+              display:block;
+            "
+          >
+        </div>
+      </div>
+
+      ${showNextButton ? `
+        <div style="
+          position:absolute;
+          bottom:6%;
+          left:50%;
+          transform:translateX(-50%);
+          z-index:20;
+        ">
+          <button
+            id="introNextButton"
+            style="
+              font-size:24px;
+              padding:12px 28px;
+              border-radius:12px;
+              cursor:pointer;
+            "
+          >
+            Next →
+          </button>
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
 function renderAlienJarScene({
   headerText = "",
   alienColor = "green",
@@ -1968,15 +2083,12 @@ function buildPracticeAndFillerConfigs(fillerObjects) {
   };
 }
 
-function buildCriticalConfig(targetName, distractorName, headerText) {
-  const cloudCoveredSide = null;
-  const targetSide = getOtherSide(cloudCoveredSide);
-  const distractorSide = cloudCoveredSide;
-  const audio = getCriticalAudio(targetName);
+function buildCriticalConfig(targetName, distractorName, blockLabel, trialIndex) {
+  const targetSide = getRandomSide();
+  const distractorSide = getOtherSide(targetSide);
 
   return {
-    phase: "cloud_critical",
-    headerText,
+    headerText: "",
     alienId: TASK_ALIEN.id,
     alienName: TASK_ALIEN.name,
     alienColor: TASK_ALIEN.color,
@@ -1990,14 +2102,19 @@ function buildCriticalConfig(targetName, distractorName, headerText) {
 
     targetObject: targetName,
     distractorObject: distractorName,
-    targetSide,
-    distractorSide,
-    cloudCoveredSide,
-    cloudCoveredJar: getJarColorFromSide(cloudCoveredSide),
-    audio
+    targetSide: targetSide,
+    distractorSide: distractorSide,
+
+    audio: getCriticalAudio(targetName),
+
+    phase: "critical",
+    blockLabel: blockLabel,
+    trialIndex: trialIndex,
+
+    cloudCoveredSide: null,
+    cloudCoveredJar: null
   };
 }
-
 
 // ==================================================
 // NORMAL PRACTICE TRIALS
