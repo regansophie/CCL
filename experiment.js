@@ -701,19 +701,60 @@ function renderSingleAlienIntroScreen({
   `;
 }
 
-function renderAlienObjectIntroScreen({
-  text = "",
+function renderAlienJarScene({
+  headerText = "",
   alienColor = "green",
   alienNumber = 1,
-  objectType = null,
-  objectName = null,
-  showNextButton = true
+
+  leftObjectType = null,
+  leftObject = null,
+  rightObjectType = null,
+  rightObject = null,
+
+  showChoiceButtons = true,
+  showCertaintyButtons = false,
+  feedbackText = "",
+
+  cloudCoveredSide = null
 } = {}) {
   const alienSrc = getAlienSrc(alienColor, alienNumber);
-  const objectSrc = getObjectSrc(objectType, objectName);
+  const jars = getJarSources();
+
+  // NO-CLOUD VERSION: always show both objects
+  const leftObjectSrc = getObjectSrc(leftObjectType, leftObject);
+  const rightObjectSrc = getObjectSrc(rightObjectType, rightObject);
+
+  const leftLabel = jars.left.includes("orange") ? "The orange jar" : "The purple jar";
+  const rightLabel = jars.right.includes("orange") ? "The orange jar" : "The purple jar";
 
   return `
-    <div style="position:fixed; inset:0; overflow:hidden;">
+    <div id="sceneRoot" style="position:fixed; inset:0; overflow:hidden;">
+
+      <style>
+        .feedback-correct {
+          animation: pulseCorrect 0.6s ease-in-out 2;
+        }
+
+        .feedback-wrong {
+          animation: shakeWrong 0.5s ease-in-out 2;
+        }
+
+        @keyframes pulseCorrect {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.12); }
+          100% { transform: scale(1); }
+        }
+
+        @keyframes shakeWrong {
+          0% { transform: translateX(0); }
+          20% { transform: translateX(-6px); }
+          40% { transform: translateX(6px); }
+          60% { transform: translateX(-6px); }
+          80% { transform: translateX(6px); }
+          100% { transform: translateX(0); }
+        }
+      </style>
+
       <img
         src="images/background.png"
         style="
@@ -725,45 +766,41 @@ function renderAlienObjectIntroScreen({
         "
       >
 
-      <!-- TEXT -->
-      <div style="
+      <div id="headerText" style="
         position:absolute;
-        top:12%;
+        top:6%;
         left:50%;
         transform:translateX(-50%);
-        width:70%;
+        width:72%;
         text-align:center;
         font-size:3vw;
         line-height:1.6;
         color:white;
         text-shadow:3px 3px 6px rgba(0,0,0,0.7);
-        z-index:10;
+        z-index:20;
       ">
-        ${text}
+        ${headerText}
       </div>
 
-      <!-- OBJECT (centered) -->
-      <div style="
+      ${showCertaintyButtons ? renderCertaintyControls() : ""}
+
+      <div id="feedbackText" style="
         position:absolute;
+        top:${showCertaintyButtons ? "39%" : "24%"};
         left:50%;
-        top:48%;
-        transform:translate(-50%, -50%);
-        z-index:10;
+        transform:translateX(-50%);
+        width:70%;
+        text-align:center;
+        font-size:2vw;
+        line-height:1.5;
+        color:white;
+        text-shadow:3px 3px 6px rgba(0,0,0,0.7);
+        z-index:30;
+        min-height:2em;
       ">
-        ${objectSrc ? `
-          <img
-            src="${objectSrc}"
-            style="
-              height:28vh;
-              max-width:24vw;
-              object-fit:contain;
-              display:block;
-            "
-          >
-        ` : ""}
+        ${feedbackText}
       </div>
 
-      <!-- FIXED BOTTOM LAYOUT (same scale as main scene) -->
       <div style="
         position:absolute;
         left:50%;
@@ -772,16 +809,88 @@ function renderAlienObjectIntroScreen({
         width:86%;
         max-width:1300px;
         display:flex;
-        justify-content:flex-start;
         align-items:flex-end;
+        justify-content:center;
+        gap:14vw;
         z-index:10;
       ">
+
+        <div style="
+          width:22vw;
+          max-width:260px;
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+        ">
+          <div style="
+            position:relative;
+            width:100%;
+            height:42vh;
+            max-height:420px;
+            display:flex;
+            justify-content:center;
+            align-items:flex-end;
+          ">
+            <img
+              id="leftJar"
+              src="${jars.left}"
+              style="
+                height:42vh;
+                max-height:420px;
+                object-fit:contain;
+                display:block;
+                position:absolute;
+                bottom:0;
+                left:50%;
+                transform:translateX(-50%);
+                z-index:12;
+              "
+            >
+
+            ${leftObjectSrc ? `
+              <img
+                id="leftObject"
+                src="${leftObjectSrc}"
+                style="
+                  position:absolute;
+                  left:50%;
+                  bottom:10%;
+                  transform:translateX(-50%);
+                  height:14vh;
+                  max-height:130px;
+                  max-width:70%;
+                  object-fit:contain;
+                  z-index:13;
+                  pointer-events:none;
+                "
+              >
+            ` : ""}
+          </div>
+
+          ${showChoiceButtons ? `
+            <button
+              id="leftChoice"
+              style="
+                margin-top:12px;
+                font-size:22px;
+                padding:10px 20px;
+                border-radius:12px;
+                cursor:pointer;
+                z-index:40;
+              "
+            >
+              ${leftLabel}
+            </button>
+          ` : ""}
+        </div>
+
         <div style="
           width:18vw;
           max-width:220px;
           display:flex;
-          justify-content:center;
-          align-items:flex-end;
+          flex-direction:column;
+          align-items:center;
+          justify-content:flex-end;
         ">
           <img
             src="${alienSrc}"
@@ -792,29 +901,76 @@ function renderAlienObjectIntroScreen({
             "
           >
         </div>
-      </div>
 
-      ${showNextButton ? `
         <div style="
-          position:absolute;
-          bottom:6%;
-          left:50%;
-          transform:translateX(-50%);
-          z-index:20;
+          width:22vw;
+          max-width:260px;
+          display:flex;
+          flex-direction:column;
+          align-items:center;
         ">
-          <button
-            id="introNextButton"
-            style="
-              font-size:24px;
-              padding:12px 28px;
-              border-radius:12px;
-              cursor:pointer;
-            "
-          >
-            Next →
-          </button>
+          <div style="
+            position:relative;
+            width:100%;
+            height:42vh;
+            max-height:420px;
+            display:flex;
+            justify-content:center;
+            align-items:flex-end;
+          ">
+            <img
+              id="rightJar"
+              src="${jars.right}"
+              style="
+                height:42vh;
+                max-height:420px;
+                object-fit:contain;
+                display:block;
+                position:absolute;
+                bottom:0;
+                left:50%;
+                transform:translateX(-50%);
+                z-index:12;
+              "
+            >
+
+            ${rightObjectSrc ? `
+              <img
+                id="rightObject"
+                src="${rightObjectSrc}"
+                style="
+                  position:absolute;
+                  left:50%;
+                  bottom:10%;
+                  transform:translateX(-50%);
+                  height:14vh;
+                  max-height:130px;
+                  max-width:70%;
+                  object-fit:contain;
+                  z-index:13;
+                  pointer-events:none;
+                "
+              >
+            ` : ""}
+          </div>
+
+          ${showChoiceButtons ? `
+            <button
+              id="rightChoice"
+              style="
+                margin-top:12px;
+                font-size:22px;
+                padding:10px 20px;
+                border-radius:12px;
+                cursor:pointer;
+                z-index:40;
+              "
+            >
+              ${rightLabel}
+            </button>
+          ` : ""}
         </div>
-      ` : ""}
+      </div>
     </div>
   `;
 }
