@@ -11,7 +11,22 @@ const jsPsych = initJsPsych({
 // ==================================================
 // PARTICIPANT + DATAPIPE SETUP
 // ==================================================
-const participantID = jsPsych.randomization.randomID(10);
+function getTimestampID() {
+  const now = new Date();
+
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+
+  return `${year}${month}${day}_${hours}${minutes}${seconds}`;
+}
+
+const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`;
+
 const DATAPIPE_EXPERIMENT_ID = "g5V2itw0QPv9";
 
 jsPsych.data.addProperties({
@@ -183,7 +198,12 @@ function getAlienSrc(color, number) {
 }
 
 function getObjectSrc(objectType, objectName) {
-  if (!objectType || !objectName) return null;
+  if (!objectName) return null;
+
+  if (objectName.includes("/")) {
+    return objectName;
+  }
+
   return `stimuli/objects/${objectType}/${objectName}.png`;
 }
 
@@ -312,6 +332,10 @@ const IMAGE_PRELOAD = [
   "stimuli/jars/orange_jar.png",
   "stimuli/jars/purple_jar.png",
 
+  "images/flying.png",
+  "images/telescopes.png",
+  "images/moonball.png",
+
   ...FILLER_OBJECTS.map(obj => `stimuli/objects/filler/${obj}.png`),
   ...TARGET_OBJECTS.map(obj => `stimuli/objects/target/${obj}.png`),
   ...DISTRACTOR_OBJECTS.map(obj => `stimuli/objects/distractor/${obj}.png`)
@@ -325,12 +349,16 @@ const AUDIO_PRELOAD = [
 
   "stimuli/audio/intro/intro_1.mp3",
   "stimuli/audio/intro/intro_2.mp3",
+  "stimuli/audio/intro/intro_3.mp3",
   "stimuli/audio/intro/intro_starberry.mp3",
   "stimuli/audio/intro/intro_rainbow_poofle.mp3",
   "stimuli/audio/intro/intro_new_alien.mp3",
   "stimuli/audio/intro/intro_jars_1.mp3",
   "stimuli/audio/intro/intro_jars_2.mp3",
   "stimuli/audio/intro/intro_jars_3.mp3",
+  "stimuli/audio/intro/intro_flying.mp3",
+  "stimuli/audio/intro/intro_telescopes.mp3",
+  "stimuli/audio/intro/intro_moonball.mp3",
 
   getConditionCloudAudio()
 ];
@@ -399,7 +427,7 @@ function setupIntroAudioAndNext(audio) {
   }
 
   if (audio) {
- //   disableNext();
+   disableNext();
 
     window.currentIntroAudio = new Audio(audio);
     window.currentIntroAudio.addEventListener("ended", enableNext);
@@ -2554,7 +2582,7 @@ var consent_block = {
   ]
 };
 
-var opening_instructions = {
+var opening_instructions_RPP = {
   type: jsPsychHtmlButtonResponse,
   stimulus: `
     <div style="
@@ -2591,6 +2619,82 @@ var opening_instructions = {
     ">%choice%</button>`
 };
 
+var opening_instructions_prolific = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div style="
+      font-size: 24px;
+      line-height: 1.4;
+      color: black;
+      max-width: 800px;
+      margin: 0 auto;
+      padding-top: 10%;
+      text-align: center;
+    ">
+      <p style="margin-top: 20px;">
+        After this page, you will see a consent form. Once you give consent, the experiment will begin.
+      </p>
+      <p style="margin-top: 20px;">Click Next to begin.</p>
+    </div>
+  `,
+  choices: ["Next →"],
+  button_html: `
+    <button class="jspsych-btn" style="
+      font-size: 22px;
+      padding: 12px 24px;
+      margin-top: 30px;
+      border-radius: 10px;
+      cursor: pointer;
+    ">%choice%</button>`
+};
+
+var prolific_id_page = {
+  type: jsPsychSurveyText,
+  questions: [{
+    prompt: `
+      <div style="font-size:22px; text-align:center; margin-bottom:20px;">
+        Please enter your Prolific ID.
+      </div>
+    `,
+    placeholder: "Enter your Prolific ID here",
+    required: true,
+    name: "prolific_id"
+  }],
+  button_label: "Submit",
+  on_finish: function(data) {
+    jsPsych.data.addProperties({
+      prolific_id: data.response.prolific_id
+    });
+  }
+};
+
+
+var prolific_completion_page = {
+  type: jsPsychHtmlKeyboardResponse,
+  choices: "NO_KEYS",
+  stimulus: `
+    <div style="
+      font-size: 24px;
+      line-height: 1.5;
+      color: black;
+      max-width: 800px;
+      margin: 0 auto;
+      padding-top: 10%;
+      text-align: center;
+    ">
+      <p>Thank you for participating!</p>
+      <p style="margin-top: 20px;">Your Prolific completion code is:</p>
+      <p style="margin-top: 10px; font-size: 32px; font-weight: bold;">
+        <code>C13L0HGM</code>
+      </p>
+      <p style="margin-top: 30px;">
+        You can now return to Prolific and enter this code.<br>
+        When you are done, you may close this window.
+      </p>
+    </div>
+  `
+};
+
 var credit_instructions = {
   type: jsPsychHtmlKeyboardResponse,
   choices: ["Enter", " "],
@@ -2620,6 +2724,71 @@ var credit_instructions = {
   `
 };
 
+// ==================================================
+// PARTICIPANT SOURCE SELECTION
+// ==================================================
+let participantSource = null;
+
+const participant_source_page = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div style="
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+      line-height: 1.6;
+      font-size: 28px;
+    ">
+      <p><strong>Are you completing this study on Prolific or RPP?</strong></p>
+      <p>Please choose the option that applies to you.</p>
+    </div>
+  `,
+  choices: ["RPP participant", "Prolific participant"],
+  on_finish: function(data) {
+    participantSource = data.response === 0 ? "RPP" : "Prolific";
+
+    jsPsych.data.addProperties({
+      participant_source: participantSource
+    });
+
+    console.log("Participant source:", participantSource);
+  }
+};
+
+// ==================================================
+// CONDITIONAL INTRO BLOCKS
+// ==================================================
+const rpp_intro_block = {
+  timeline: [opening_instructions_RPP],
+  conditional_function: function() {
+    return participantSource === "RPP";
+  }
+};
+
+const prolific_intro_block = {
+  timeline: [prolific_id_page, opening_instructions_prolific],
+  conditional_function: function() {
+    return participantSource === "Prolific";
+  }
+};
+
+// ==================================================
+// CONDITIONAL ENDING BLOCKS
+// ==================================================
+const prolific_ending_block = {
+  timeline: [prolific_completion_page],
+  conditional_function: function() {
+    return participantSource === "Prolific";
+  }
+};
+
+const rpp_ending_block = {
+  timeline: [credit_instructions],
+  conditional_function: function() {
+    return participantSource === "RPP";
+  }
+};
+
 
 // ==================================================
 // SAVE DATA TO OSF VIA DATAPIPE
@@ -2644,7 +2813,9 @@ const timeline = [];
 timeline.push(makePreloadTrial());
 
 
-timeline.push(opening_instructions);
+timeline.push(participant_source_page);
+timeline.push(rpp_intro_block);
+timeline.push(prolific_intro_block);
 timeline.push(consent_block);
 
 // Intro sequence
@@ -2704,6 +2875,52 @@ timeline.push(
     audio: "stimuli/audio/intro/intro_rainbow_poofle.mp3"
   })
 );
+
+
+timeline.push(
+  makeObjectIntroTrial({
+    text: "",
+    alienColor: GUIDE_ALIEN.color,
+    alienNumber: GUIDE_ALIEN.number,
+    objectType: null,
+    objectName: null,
+    audio: "stimuli/audio/intro/intro_3.mp3"
+  })
+);
+
+timeline.push(
+  makeObjectIntroTrial({
+    text: "",
+    alienColor: GUIDE_ALIEN.color,
+    alienNumber: GUIDE_ALIEN.number,
+    objectType: null,
+    objectName: "images/flying.png",
+    audio: "stimuli/audio/intro/intro_flying.mp3"
+  })
+);
+
+timeline.push(
+  makeObjectIntroTrial({
+    text: "",
+    alienColor: GUIDE_ALIEN.color,
+    alienNumber: GUIDE_ALIEN.number,
+    objectType: null,
+    objectName: "images/telescopes.png",
+    audio: "stimuli/audio/intro/intro_telescopes.mp3"
+  })
+);
+
+timeline.push(
+  makeObjectIntroTrial({
+    text: "",
+    alienColor: GUIDE_ALIEN.color,
+    alienNumber: GUIDE_ALIEN.number,
+    objectType: null,
+    objectName: "images/moonball.png",
+    audio: "stimuli/audio/intro/intro_moonball.mp3"
+  })
+);
+
 
 
 // Game intro depends on condition
@@ -2768,6 +2985,7 @@ timeline.push(makeObjectNamingTrials(objectNamingConfigs));
 timeline.push(save_data_trial);
 
 // Uncomment for RPP
-timeline.push(credit_instructions);
+timeline.push(prolific_ending_block);
+timeline.push(rpp_ending_block);
 
 jsPsych.run(timeline);
