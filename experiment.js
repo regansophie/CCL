@@ -29,8 +29,14 @@ const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`
 
 const DATAPIPE_EXPERIMENT_ID = "g5V2itw0QPv9";
 
+const ex_version = "ex. 1 confident"
+
 jsPsych.data.addProperties({
   participant_id: participantID
+});
+
+jsPsych.data.addProperties({
+  ex_version: ex_version
 });
 
 
@@ -332,7 +338,7 @@ const IMAGE_PRELOAD = [
   "stimuli/jars/orange_jar.png",
   "stimuli/jars/purple_jar.png",
 
-  "images/farming.png",
+  "images/flying.png",
   "images/telescopes.png",
   "images/moonball.png",
 
@@ -356,7 +362,7 @@ const AUDIO_PRELOAD = [
   "stimuli/audio/intro/intro_jars_1.mp3",
   "stimuli/audio/intro/intro_jars_2.mp3",
   "stimuli/audio/intro/intro_jars_3.mp3",
-  "stimuli/audio/intro/intro_farming.mp3",
+  "stimuli/audio/intro/intro_flying.mp3",
   "stimuli/audio/intro/intro_telescopes.mp3",
   "stimuli/audio/intro/intro_moonball.mp3",
 
@@ -3003,8 +3009,8 @@ timeline.push(
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
     objectType: null,
-    objectName: "images/farming.png",
-    audio: "stimuli/audio/intro/intro_farming.mp3"
+    objectName: "images/flying.png",
+    audio: "stimuli/audio/intro/intro_flying.mp3"
   })
 );
 
