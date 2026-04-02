@@ -332,7 +332,7 @@ const IMAGE_PRELOAD = [
   "stimuli/jars/orange_jar.png",
   "stimuli/jars/purple_jar.png",
 
-  "images/flying.png",
+  "images/farming.png",
   "images/telescopes.png",
   "images/moonball.png",
 
@@ -356,7 +356,7 @@ const AUDIO_PRELOAD = [
   "stimuli/audio/intro/intro_jars_1.mp3",
   "stimuli/audio/intro/intro_jars_2.mp3",
   "stimuli/audio/intro/intro_jars_3.mp3",
-  "stimuli/audio/intro/intro_flying.mp3",
+  "stimuli/audio/intro/intro_farming.mp3",
   "stimuli/audio/intro/intro_telescopes.mp3",
   "stimuli/audio/intro/intro_moonball.mp3",
 
@@ -2519,6 +2519,94 @@ function makeObjectNamingTrials(configList) {
 }
 
 
+function makeAlienJobFreeResponseTrial({
+  alienColor = "green",
+  promptText = "Do you remember the job of these aliens?"
+} = {}) {
+  const alienNums = [1, 2, 3, 4];
+  const alienImgs = alienNums.map(
+    n => `<img
+            src="${getAlienSrc(alienColor, n)}"
+            style="
+              height:18vh;
+              object-fit:contain;
+              display:block;
+            "
+          >`
+  ).join("");
+
+  return {
+    type: jsPsychSurveyText,
+    questions: [
+      {
+        prompt: `
+          <div style="
+            text-align:center;
+            width:100%;
+          ">
+            <div style="
+              font-size:3vw;
+              line-height:1.6;
+              color:white;
+              text-shadow:3px 3px 6px rgba(0,0,0,0.7);
+              margin-bottom:30px;
+            ">
+              ${promptText}
+            </div>
+
+            <div style="
+              display:flex;
+              gap:2vw;
+              align-items:flex-end;
+              justify-content:center;
+              margin-bottom:30px;
+            ">
+              ${alienImgs}
+            </div>
+          </div>
+        `,
+        name: "job_response",
+        required: true,
+        rows: 1,
+        columns: 50,
+        placeholder: "Type your answer here"
+      }
+    ],
+    preamble: `
+      <div style="position:fixed; inset:0; overflow:hidden; z-index:-1;">
+        <img
+          src="images/background.png"
+          style="
+            position:absolute;
+            inset:0;
+            width:100%;
+            height:100%;
+            object-fit:cover;
+          "
+        >
+      </div>
+    `,
+    data: {
+      trial_type: "alien_job_free_response",
+      alien_color_question: alienColor
+    },
+    on_finish: function(data) {
+      const response = data.response || {};
+      data.job_response = response.job_response || "";
+    }
+  };
+}
+
+const green_job_free_response_trial = makeAlienJobFreeResponseTrial({
+  alienColor: "green",
+  promptText: "Do you remember the job of the green aliens?"
+});
+
+const yellow_job_free_response_trial = makeAlienJobFreeResponseTrial({
+  alienColor: "yellow",
+  promptText: "Do you remember the job of the yellow aliens?"
+});
+
 // ==================================================
 // BUILD CONFIGS
 // ==================================================
@@ -2805,6 +2893,24 @@ const save_data_trial = {
 };
 
 
+const volume_check_screen = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div style="
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+      font-size: 28px;
+      line-height: 1.6;
+    ">
+      <p><strong>Please make sure your sound is turned ON.</strong></p>
+      <p>You will hear audio instructions during the experiment.</p>
+      <p>Turn up your volume before continuing.</p>
+    </div>
+  `,
+  choices: ["Continue"]
+};
+
 // ==================================================
 // TIMELINE
 // ==================================================
@@ -2817,6 +2923,9 @@ timeline.push(participant_source_page);
 timeline.push(rpp_intro_block);
 timeline.push(prolific_intro_block);
 timeline.push(consent_block);
+timeline.push(volume_check_screen);
+
+
 
 // Intro sequence
 timeline.push(
@@ -2894,8 +3003,8 @@ timeline.push(
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
     objectType: null,
-    objectName: "images/flying.png",
-    audio: "stimuli/audio/intro/intro_flying.mp3"
+    objectName: "images/farming.png",
+    audio: "stimuli/audio/intro/intro_farming.mp3"
   })
 );
 
@@ -2980,6 +3089,9 @@ timeline.push(makeCriticalTrials(criticalConfigsBlock2));
 
 // Naming test
 timeline.push(makeObjectNamingTrials(objectNamingConfigs));
+
+timeline.push(green_job_free_response_trial);
+timeline.push(yellow_job_free_response_trial);
 
 // Save to OSF
 timeline.push(save_data_trial);
