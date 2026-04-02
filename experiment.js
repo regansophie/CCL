@@ -1264,15 +1264,8 @@ function renderAlienJarScene({
   const alienSrc = getAlienSrc(alienColor, alienNumber);
   const jars = getJarSources();
 
-  const leftObjectSrc =
-    cloudCoveredSide === "left"
-      ? null
-      : getObjectSrc(leftObjectType, leftObject);
-
-  const rightObjectSrc =
-    cloudCoveredSide === "right"
-      ? null
-      : getObjectSrc(rightObjectType, rightObject);
+  const leftObjectSrc = getObjectSrc(leftObjectType, leftObject);
+  const rightObjectSrc = getObjectSrc(rightObjectType, rightObject);
 
   const leftLabel = jars.left.includes("orange") ? "The orange jar" : "The purple jar";
   const rightLabel = jars.right.includes("orange") ? "The orange jar" : "The purple jar";
@@ -1365,7 +1358,6 @@ function renderAlienJarScene({
         z-index:10;
       ">
 
-        <!-- LEFT JAR -->
         <div style="
           width:22vw;
           max-width:260px;
@@ -1452,7 +1444,6 @@ function renderAlienJarScene({
           ` : ""}
         </div>
 
-        <!-- ALIEN -->
         <div style="
           width:18vw;
           max-width:220px;
@@ -1471,7 +1462,6 @@ function renderAlienJarScene({
           >
         </div>
 
-        <!-- RIGHT JAR -->
         <div style="
           width:22vw;
           max-width:260px;
@@ -1779,7 +1769,7 @@ function buildPracticeAndFillerConfigs(fillerObjects) {
 
   const fillerConfigsBlock1 = fillerBlock1Pairs.map((pair) => {
     const targetObject = Math.random() < 0.5 ? pair.leftObject : pair.rightObject;
-    const cloudCoveredSide = fixedCloudCoveredSide;
+    const cloudCoveredSide = null;
 
     return {
       phase: "cloud_filler",
@@ -1798,7 +1788,7 @@ function buildPracticeAndFillerConfigs(fillerObjects) {
 
   const fillerConfigsBlock2 = fillerBlock2Pairs.map((pair) => {
     const targetObject = Math.random() < 0.5 ? pair.leftObject : pair.rightObject;
-    const cloudCoveredSide = fixedCloudCoveredSide;
+    const cloudCoveredSide = null;
 
     return {
       phase: "cloud_filler",
@@ -1823,7 +1813,7 @@ function buildPracticeAndFillerConfigs(fillerObjects) {
 }
 
 function buildCriticalConfig(targetName, distractorName, headerText) {
-  const cloudCoveredSide = fixedCloudCoveredSide;
+  const cloudCoveredSide = null;
   const targetSide = getOtherSide(cloudCoveredSide);
   const distractorSide = cloudCoveredSide;
   const audio = getCriticalAudio(targetName);
@@ -3076,16 +3066,6 @@ if (speakerCondition === "same_speaker") {
 
 // 2 normal practice trials
 timeline.push(makePracticeTrials(practiceConfigs));
-
-// Cloud intro
-timeline.push(
-  makeCloudIntroTrial({
-    text: "Now a cloud is covering one of the jars.",
-    alienColor: TASK_ALIEN.color,
-    alienNumber: TASK_ALIEN.number,
-    audio: getConditionCloudAudio()
-  })
-);
 
 // Cloud phase with fixed cloud side
 timeline.push(makeFillerTrials(fillerConfigsBlock1));
