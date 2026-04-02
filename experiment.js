@@ -29,7 +29,7 @@ const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`
 
 const DATAPIPE_EXPERIMENT_ID = "g5V2itw0QPv9";
 
-const ex_version = "ex. 1 confident"
+const ex_version = "ex. 1 no cloud"
 
 jsPsych.data.addProperties({
   participant_id: participantID
