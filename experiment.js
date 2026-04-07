@@ -9,6 +9,33 @@ const jsPsych = initJsPsych({
 
 
 // ==================================================
+// EXPERIMENT VERSION FLAGS
+// ==================================================
+const CLOUD_VERSION = "no_cloud";
+// options: "cloud", "no_cloud"
+
+const CRITICAL_AUDIO_VERSION = "unsure";
+// options: "unsure", "confident"
+
+const JOB_VERSION = "flying";
+// options: "flying", "farming"
+
+const DISTRACTOR_VERSION = "alien";
+// options: "earth", "alien"
+
+
+// ==================================================
+// DERIVED EXPERIMENT CONFIG
+// ==================================================
+const EXP_CONFIG = {
+  useCloud: CLOUD_VERSION === "cloud",
+  criticalAudioSuffix: CRITICAL_AUDIO_VERSION === "unsure" ? "unsure" : "confident",
+  jobWord: JOB_VERSION === "farming" ? "farming" : "flying",
+  distractorVersion: DISTRACTOR_VERSION === "alien" ? "alien" : "earth"
+};
+
+
+// ==================================================
 // PARTICIPANT + DATAPIPE SETUP
 // ==================================================
 function getTimestampID() {
@@ -29,14 +56,16 @@ const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`
 
 const DATAPIPE_EXPERIMENT_ID = "a09JsZ7J75Rd";
 
-const ex_version = "ex. 1 no cloud unsure"
+const ex_version =
+  `cloud_${CLOUD_VERSION}__audio_${CRITICAL_AUDIO_VERSION}__job_${JOB_VERSION}__distractors_${DISTRACTOR_VERSION}`;
 
 jsPsych.data.addProperties({
-  participant_id: participantID
-});
-
-jsPsych.data.addProperties({
-  ex_version: ex_version
+  participant_id: participantID,
+  ex_version: ex_version,
+  cloud_version: CLOUD_VERSION,
+  critical_audio_version: CRITICAL_AUDIO_VERSION,
+  job_version: JOB_VERSION,
+  distractor_version: DISTRACTOR_VERSION
 });
 
 
@@ -71,8 +100,7 @@ function getJarSources() {
 // SPEAKER CONDITIONS
 // ==================================================
 const speakerCondition = jsPsych.randomization.sampleWithoutReplacement(
-   ["same_speaker", "new_same_group", "new_different_group"],
-  //["same_speaker"],
+  ["same_speaker", "new_same_group", "new_different_group"],
   1
 )[0];
 
@@ -184,10 +212,10 @@ const TARGET_OBJECTS = [
   "rainbow_poofle"
 ];
 
-const DISTRACTOR_OBJECTS = [
-  "banana",
-  "cat"
-];
+const DISTRACTOR_OBJECTS =
+  EXP_CONFIG.distractorVersion === "alien"
+    ? ["cake", "elephant"]
+    : ["banana", "cat"];
 
 if (FILLER_OBJECTS.length < REQUIRED_FILLER_OBJECTS) {
   throw new Error(
@@ -214,6 +242,7 @@ function getObjectSrc(objectType, objectName) {
 }
 
 function getJarColorFromSide(side) {
+  if (!side) return null;
   const jars = getJarSources();
   const src = side === "left" ? jars.left : jars.right;
   return src.includes("orange") ? "orange" : "purple";
@@ -233,6 +262,19 @@ function getOtherSide(side) {
 function getRandomSide() {
   return Math.random() < 0.5 ? "left" : "right";
 }
+
+function getJobWord() {
+  return EXP_CONFIG.jobWord;
+}
+
+function getJobImagePath() {
+  return `images/${getJobWord()}.png`;
+}
+
+function getJobIntroAudioPath() {
+  return `stimuli/audio/intro/intro_${getJobWord()}.mp3`;
+}
+
 
 // ==================================================
 // AUDIO PATH HELPERS
@@ -277,13 +319,14 @@ function getFillerAudioSrc(objectName) {
 
 function getCriticalAudio(targetObject) {
   const alienFolder = getConditionAudioAlienFolder();
+  const suffix = EXP_CONFIG.criticalAudioSuffix;
 
   if (targetObject === "starberry") {
-    return `stimuli/audio/${alienFolder}/target/fruit.mp3`;
+    return `stimuli/audio/${alienFolder}/target/fruit_${suffix}.mp3`;
   }
 
   if (targetObject === "rainbow_poofle") {
-    return `stimuli/audio/${alienFolder}/target/animal.mp3`;
+    return `stimuli/audio/${alienFolder}/target/animal_${suffix}.mp3`;
   }
 
   return null;
@@ -309,11 +352,11 @@ function getJarsIntroAudio() {
 // ==================================================
 // FIXED CLOUD SIDE FOR WHOLE CLOUD PHASE
 // ==================================================
-const fixedCloudCoveredSide = getRandomSide();
+const fixedCloudCoveredSide = EXP_CONFIG.useCloud ? getRandomSide() : null;
 
 jsPsych.data.addProperties({
   fixed_cloud_covered_side: fixedCloudCoveredSide,
-  fixed_cloud_covered_jar: getJarColorFromSide(fixedCloudCoveredSide)
+  fixed_cloud_covered_jar: fixedCloudCoveredSide ? getJarColorFromSide(fixedCloudCoveredSide) : null
 });
 
 console.log("Fixed cloud covered side:", fixedCloudCoveredSide);
@@ -324,7 +367,8 @@ console.log("Fixed cloud covered side:", fixedCloudCoveredSide);
 // ==================================================
 const IMAGE_PRELOAD = [
   "images/background.png",
-  "images/cloud.png",
+
+  ...(EXP_CONFIG.useCloud ? ["images/cloud.png"] : []),
 
   "images/aliens/alien_green_1.png",
   "images/aliens/alien_green_2.png",
@@ -338,7 +382,7 @@ const IMAGE_PRELOAD = [
   "stimuli/jars/orange_jar.png",
   "stimuli/jars/purple_jar.png",
 
-  "images/flying.png",
+  getJobImagePath(),
   "images/telescopes.png",
   "images/moonball.png",
 
@@ -362,11 +406,11 @@ const AUDIO_PRELOAD = [
   "stimuli/audio/intro/intro_jars_1.mp3",
   "stimuli/audio/intro/intro_jars_2.mp3",
   "stimuli/audio/intro/intro_jars_3.mp3",
-  "stimuli/audio/intro/intro_flying.mp3",
+  getJobIntroAudioPath(),
   "stimuli/audio/intro/intro_telescopes.mp3",
   "stimuli/audio/intro/intro_moonball.mp3",
 
-  getConditionCloudAudio()
+  ...(EXP_CONFIG.useCloud ? [getConditionCloudAudio()] : [])
 ];
 
 function makePreloadTrial() {
@@ -433,7 +477,7 @@ function setupIntroAudioAndNext(audio) {
   }
 
   if (audio) {
-   disableNext();
+    disableNext();
 
     window.currentIntroAudio = new Audio(audio);
     window.currentIntroAudio.addEventListener("ended", enableNext);
@@ -812,280 +856,6 @@ function renderAlienObjectIntroScreen({
           </button>
         </div>
       ` : ""}
-    </div>
-  `;
-}
-
-function renderAlienJarScene({
-  headerText = "",
-  alienColor = "green",
-  alienNumber = 1,
-
-  leftObjectType = null,
-  leftObject = null,
-  rightObjectType = null,
-  rightObject = null,
-
-  showChoiceButtons = true,
-  showCertaintyButtons = false,
-  feedbackText = "",
-
-  cloudCoveredSide = null
-} = {}) {
-  const alienSrc = getAlienSrc(alienColor, alienNumber);
-  const jars = getJarSources();
-
-  // NO-CLOUD VERSION: always show both objects
-  const leftObjectSrc = getObjectSrc(leftObjectType, leftObject);
-  const rightObjectSrc = getObjectSrc(rightObjectType, rightObject);
-
-  const leftLabel = jars.left.includes("orange") ? "The orange jar" : "The purple jar";
-  const rightLabel = jars.right.includes("orange") ? "The orange jar" : "The purple jar";
-
-  return `
-    <div id="sceneRoot" style="position:fixed; inset:0; overflow:hidden;">
-
-      <style>
-        .feedback-correct {
-          animation: pulseCorrect 0.6s ease-in-out 2;
-        }
-
-        .feedback-wrong {
-          animation: shakeWrong 0.5s ease-in-out 2;
-        }
-
-        @keyframes pulseCorrect {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.12); }
-          100% { transform: scale(1); }
-        }
-
-        @keyframes shakeWrong {
-          0% { transform: translateX(0); }
-          20% { transform: translateX(-6px); }
-          40% { transform: translateX(6px); }
-          60% { transform: translateX(-6px); }
-          80% { transform: translateX(6px); }
-          100% { transform: translateX(0); }
-        }
-      </style>
-
-      <img
-        src="images/background.png"
-        style="
-          position:absolute;
-          inset:0;
-          width:100%;
-          height:100%;
-          object-fit:cover;
-        "
-      >
-
-      <div id="headerText" style="
-        position:absolute;
-        top:6%;
-        left:50%;
-        transform:translateX(-50%);
-        width:72%;
-        text-align:center;
-        font-size:3vw;
-        line-height:1.6;
-        color:white;
-        text-shadow:3px 3px 6px rgba(0,0,0,0.7);
-        z-index:20;
-      ">
-        ${headerText}
-      </div>
-
-      ${showCertaintyButtons ? renderCertaintyControls() : ""}
-
-      <div id="feedbackText" style="
-        position:absolute;
-        top:${showCertaintyButtons ? "39%" : "24%"};
-        left:50%;
-        transform:translateX(-50%);
-        width:70%;
-        text-align:center;
-        font-size:2vw;
-        line-height:1.5;
-        color:white;
-        text-shadow:3px 3px 6px rgba(0,0,0,0.7);
-        z-index:30;
-        min-height:2em;
-      ">
-        ${feedbackText}
-      </div>
-
-      <div style="
-        position:absolute;
-        left:50%;
-        bottom:5%;
-        transform:translateX(-50%);
-        width:86%;
-        max-width:1300px;
-        display:flex;
-        align-items:flex-end;
-        justify-content:center;
-        gap:14vw;
-        z-index:10;
-      ">
-
-        <div style="
-          width:22vw;
-          max-width:260px;
-          display:flex;
-          flex-direction:column;
-          align-items:center;
-        ">
-          <div style="
-            position:relative;
-            width:100%;
-            height:42vh;
-            max-height:420px;
-            display:flex;
-            justify-content:center;
-            align-items:flex-end;
-          ">
-            <img
-              id="leftJar"
-              src="${jars.left}"
-              style="
-                height:42vh;
-                max-height:420px;
-                object-fit:contain;
-                display:block;
-                position:absolute;
-                bottom:0;
-                left:50%;
-                transform:translateX(-50%);
-                z-index:12;
-              "
-            >
-
-            ${leftObjectSrc ? `
-              <img
-                id="leftObject"
-                src="${leftObjectSrc}"
-                style="
-                  position:absolute;
-                  left:50%;
-                  bottom:10%;
-                  transform:translateX(-50%);
-                  height:14vh;
-                  max-height:130px;
-                  max-width:70%;
-                  object-fit:contain;
-                  z-index:13;
-                  pointer-events:none;
-                "
-              >
-            ` : ""}
-          </div>
-
-          ${showChoiceButtons ? `
-            <button
-              id="leftChoice"
-              style="
-                margin-top:12px;
-                font-size:22px;
-                padding:10px 20px;
-                border-radius:12px;
-                cursor:pointer;
-                z-index:40;
-              "
-            >
-              ${leftLabel}
-            </button>
-          ` : ""}
-        </div>
-
-        <div style="
-          width:18vw;
-          max-width:220px;
-          display:flex;
-          flex-direction:column;
-          align-items:center;
-          justify-content:flex-end;
-        ">
-          <img
-            src="${alienSrc}"
-            style="
-              height:${ALIEN_HEIGHT};
-              object-fit:contain;
-              display:block;
-            "
-          >
-        </div>
-
-        <div style="
-          width:22vw;
-          max-width:260px;
-          display:flex;
-          flex-direction:column;
-          align-items:center;
-        ">
-          <div style="
-            position:relative;
-            width:100%;
-            height:42vh;
-            max-height:420px;
-            display:flex;
-            justify-content:center;
-            align-items:flex-end;
-          ">
-            <img
-              id="rightJar"
-              src="${jars.right}"
-              style="
-                height:42vh;
-                max-height:420px;
-                object-fit:contain;
-                display:block;
-                position:absolute;
-                bottom:0;
-                left:50%;
-                transform:translateX(-50%);
-                z-index:12;
-              "
-            >
-
-            ${rightObjectSrc ? `
-              <img
-                id="rightObject"
-                src="${rightObjectSrc}"
-                style="
-                  position:absolute;
-                  left:50%;
-                  bottom:10%;
-                  transform:translateX(-50%);
-                  height:14vh;
-                  max-height:130px;
-                  max-width:70%;
-                  object-fit:contain;
-                  z-index:13;
-                  pointer-events:none;
-                "
-              >
-            ` : ""}
-          </div>
-
-          ${showChoiceButtons ? `
-            <button
-              id="rightChoice"
-              style="
-                margin-top:12px;
-                font-size:22px;
-                padding:10px 20px;
-                border-radius:12px;
-                cursor:pointer;
-                z-index:40;
-              "
-            >
-              ${rightLabel}
-            </button>
-          ` : ""}
-        </div>
-      </div>
     </div>
   `;
 }
@@ -1535,8 +1305,11 @@ function renderAlienJarScene({
   const alienSrc = getAlienSrc(alienColor, alienNumber);
   const jars = getJarSources();
 
-  const leftObjectSrc = getObjectSrc(leftObjectType, leftObject);
-  const rightObjectSrc = getObjectSrc(rightObjectType, rightObject);
+  const shouldHideLeftObject = EXP_CONFIG.useCloud && cloudCoveredSide === "left";
+  const shouldHideRightObject = EXP_CONFIG.useCloud && cloudCoveredSide === "right";
+
+  const leftObjectSrc = shouldHideLeftObject ? null : getObjectSrc(leftObjectType, leftObject);
+  const rightObjectSrc = shouldHideRightObject ? null : getObjectSrc(rightObjectType, rightObject);
 
   const leftLabel = jars.left.includes("orange") ? "The orange jar" : "The purple jar";
   const rightLabel = jars.right.includes("orange") ? "The orange jar" : "The purple jar";
@@ -1680,7 +1453,7 @@ function renderAlienJarScene({
               >
             ` : ""}
 
-            ${cloudCoveredSide === "left" ? `
+            ${EXP_CONFIG.useCloud && cloudCoveredSide === "left" ? `
               <img
                 src="images/cloud.png"
                 style="
@@ -1784,7 +1557,7 @@ function renderAlienJarScene({
               >
             ` : ""}
 
-            ${cloudCoveredSide === "right" ? `
+            ${EXP_CONFIG.useCloud && cloudCoveredSide === "right" ? `
               <img
                 src="images/cloud.png"
                 style="
@@ -1822,6 +1595,7 @@ function renderAlienJarScene({
     </div>
   `;
 }
+
 
 // ==================================================
 // LABEL TEST RENDERER
@@ -1962,7 +1736,7 @@ function getTrialDataBase() {
     left_jar: jars.left,
     right_jar: jars.right,
     fixed_cloud_covered_side: fixedCloudCoveredSide,
-    fixed_cloud_covered_jar: getJarColorFromSide(fixedCloudCoveredSide)
+    fixed_cloud_covered_jar: fixedCloudCoveredSide ? getJarColorFromSide(fixedCloudCoveredSide) : null
   };
 }
 
@@ -2040,10 +1814,10 @@ function buildPracticeAndFillerConfigs(fillerObjects) {
 
   const fillerConfigsBlock1 = fillerBlock1Pairs.map((pair) => {
     const targetObject = Math.random() < 0.5 ? pair.leftObject : pair.rightObject;
-    const cloudCoveredSide = null;
+    const cloudCoveredSide = EXP_CONFIG.useCloud ? fixedCloudCoveredSide : null;
 
     return {
-      phase: "cloud_filler",
+      phase: EXP_CONFIG.useCloud ? "cloud_filler" : "filler",
       headerText: "Choose a jar.",
       alienId: TASK_ALIEN.id,
       alienName: TASK_ALIEN.name,
@@ -2052,17 +1826,17 @@ function buildPracticeAndFillerConfigs(fillerObjects) {
       targetObject,
       audio: getFillerAudioSrc(targetObject),
       cloudCoveredSide,
-      cloudCoveredJar: getJarColorFromSide(cloudCoveredSide),
+      cloudCoveredJar: cloudCoveredSide ? getJarColorFromSide(cloudCoveredSide) : null,
       ...pair
     };
   });
 
   const fillerConfigsBlock2 = fillerBlock2Pairs.map((pair) => {
     const targetObject = Math.random() < 0.5 ? pair.leftObject : pair.rightObject;
-    const cloudCoveredSide = null;
+    const cloudCoveredSide = EXP_CONFIG.useCloud ? fixedCloudCoveredSide : null;
 
     return {
-      phase: "cloud_filler",
+      phase: EXP_CONFIG.useCloud ? "cloud_filler" : "filler",
       headerText: "Choose a jar.",
       alienId: TASK_ALIEN.id,
       alienName: TASK_ALIEN.name,
@@ -2071,7 +1845,7 @@ function buildPracticeAndFillerConfigs(fillerObjects) {
       targetObject,
       audio: getFillerAudioSrc(targetObject),
       cloudCoveredSide,
-      cloudCoveredJar: getJarColorFromSide(cloudCoveredSide),
+      cloudCoveredJar: cloudCoveredSide ? getJarColorFromSide(cloudCoveredSide) : null,
       ...pair
     };
   });
@@ -2084,8 +1858,20 @@ function buildPracticeAndFillerConfigs(fillerObjects) {
 }
 
 function buildCriticalConfig(targetName, distractorName, blockLabel, trialIndex) {
-  const targetSide = getRandomSide();
-  const distractorSide = getOtherSide(targetSide);
+  let targetSide;
+  let distractorSide;
+  let cloudCoveredSide = null;
+  let cloudCoveredJar = null;
+
+  if (EXP_CONFIG.useCloud) {
+    cloudCoveredSide = fixedCloudCoveredSide;
+    cloudCoveredJar = getJarColorFromSide(cloudCoveredSide);
+    targetSide = getOtherSide(cloudCoveredSide);
+    distractorSide = cloudCoveredSide;
+  } else {
+    targetSide = getRandomSide();
+    distractorSide = getOtherSide(targetSide);
+  }
 
   return {
     headerText: "",
@@ -2111,10 +1897,11 @@ function buildCriticalConfig(targetName, distractorName, blockLabel, trialIndex)
     blockLabel: blockLabel,
     trialIndex: trialIndex,
 
-    cloudCoveredSide: null,
-    cloudCoveredJar: null
+    cloudCoveredSide: cloudCoveredSide,
+    cloudCoveredJar: cloudCoveredJar
   };
 }
+
 
 // ==================================================
 // NORMAL PRACTICE TRIALS
@@ -2237,7 +2024,7 @@ function makePracticeTrials(configList) {
 
 
 // ==================================================
-// FILLER TRIALS (CLOUD PHASE)
+// FILLER TRIALS
 // ==================================================
 function makeFillerTrials(configList) {
   return {
@@ -2318,7 +2105,7 @@ function makeFillerTrials(configList) {
 
 
 // ==================================================
-// CRITICAL TRIALS (CLOUD PHASE)
+// CRITICAL TRIALS
 // ==================================================
 function makeCriticalTrials(configList) {
   return {
@@ -2382,13 +2169,14 @@ function makeCriticalTrials(configList) {
           }
 
           function finishCriticalTrial(certaintyDirection, certaintyStrength) {
+            const targetSide = jsPsych.timelineVariable("targetSide");
+
             const chosenObject =
               jarChoiceSide === "left"
                 ? jsPsych.timelineVariable("leftObject")
                 : jsPsych.timelineVariable("rightObject");
 
-            const isTargetChoice =
-              chosenObject === jsPsych.timelineVariable("targetObject");
+            const isTargetChoice = jarChoiceSide === targetSide;
 
             stopTrialAudio(currentAudio);
 
@@ -2396,6 +2184,7 @@ function makeCriticalTrials(configList) {
               choice_side: jarChoiceSide,
               choice_jar: jarChoiceColor,
               chosen_object: chosenObject,
+              target_side: targetSide,
               is_target_choice: isTargetChoice,
               certainty_direction: certaintyDirection,
               certainty_strength: certaintyStrength
@@ -2787,7 +2576,6 @@ function makeObjectNamingTrials(configList) {
   };
 }
 
-
 function makeAlienJobFreeResponseTrial({
   alienColor = "green",
   promptText = "Do you remember the job of these aliens?"
@@ -2876,6 +2664,7 @@ const yellow_job_free_response_trial = makeAlienJobFreeResponseTrial({
   promptText: "Do you remember the job of the yellow aliens?"
 });
 
+
 // ==================================================
 // BUILD CONFIGS
 // ==================================================
@@ -2885,10 +2674,12 @@ const {
   fillerConfigsBlock2
 } = buildPracticeAndFillerConfigs(FILLER_OBJECTS);
 
+const [criticalDistractor1, criticalDistractor2] = DISTRACTOR_OBJECTS;
+
 const criticalConfigsBlock1 = [
   buildCriticalConfig(
     "starberry",
-    "banana",
+    criticalDistractor1,
     "Choose a jar."
   )
 ];
@@ -2896,7 +2687,7 @@ const criticalConfigsBlock1 = [
 const criticalConfigsBlock2 = [
   buildCriticalConfig(
     "rainbow_poofle",
-    "cat",
+    criticalDistractor2,
     "Choose a jar."
   )
 ];
@@ -2922,7 +2713,7 @@ const objectNamingConfigs = jsPsych.randomization.shuffle([
 
 
 // ==================================================
-// RPP Instructions
+// RPP / PROLIFIC PAGES
 // ==================================================
 var consent_block = {
   timeline: [
@@ -3025,7 +2816,6 @@ var prolific_id_page = {
   }
 };
 
-
 var prolific_completion_page = {
   type: jsPsychHtmlKeyboardResponse,
   choices: "NO_KEYS",
@@ -3081,6 +2871,7 @@ var credit_instructions = {
   `
 };
 
+
 // ==================================================
 // PARTICIPANT SOURCE SELECTION
 // ==================================================
@@ -3112,6 +2903,7 @@ const participant_source_page = {
   }
 };
 
+
 // ==================================================
 // CONDITIONAL INTRO BLOCKS
 // ==================================================
@@ -3128,6 +2920,7 @@ const prolific_intro_block = {
     return participantSource === "Prolific";
   }
 };
+
 
 // ==================================================
 // CONDITIONAL ENDING BLOCKS
@@ -3148,7 +2941,7 @@ const rpp_ending_block = {
 
 
 // ==================================================
-// SAVE DATA TO OSF VIA DATAPIPE
+// SAVE DATA TO DATAPIPE
 // ==================================================
 const save_data_trial = {
   type: jsPsychPipe,
@@ -3180,6 +2973,7 @@ const volume_check_screen = {
   choices: ["Continue"]
 };
 
+
 // ==================================================
 // TIMELINE
 // ==================================================
@@ -3187,13 +2981,11 @@ const timeline = [];
 
 timeline.push(makePreloadTrial());
 
-
 timeline.push(participant_source_page);
 timeline.push(rpp_intro_block);
 timeline.push(prolific_intro_block);
 timeline.push(consent_block);
 timeline.push(volume_check_screen);
-
 
 
 // Intro sequence
@@ -3254,7 +3046,6 @@ timeline.push(
   })
 );
 
-
 timeline.push(
   makeObjectIntroTrial({
     text: "",
@@ -3272,8 +3063,8 @@ timeline.push(
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
     objectType: null,
-    objectName: "images/flying.png",
-    audio: "stimuli/audio/intro/intro_flying.mp3"
+    objectName: getJobImagePath(),
+    audio: getJobIntroAudioPath()
   })
 );
 
@@ -3298,7 +3089,6 @@ timeline.push(
     audio: "stimuli/audio/intro/intro_moonball.mp3"
   })
 );
-
 
 
 // Game intro depends on condition
@@ -3337,25 +3127,29 @@ if (speakerCondition === "same_speaker") {
   );
 }
 
-// 2 normal practice trials
 timeline.push(makePracticeTrials(practiceConfigs));
 
-// Cloud phase with fixed cloud side
+if (EXP_CONFIG.useCloud) {
+  timeline.push(
+    makeCloudIntroTrial({
+      text: "Now a cloud is covering one of the jars.",
+      alienColor: TASK_ALIEN.color,
+      alienNumber: TASK_ALIEN.number,
+      audio: getConditionCloudAudio()
+    })
+  );
+}
+
 timeline.push(makeFillerTrials(fillerConfigsBlock1));
 timeline.push(makeCriticalTrials(criticalConfigsBlock1));
 timeline.push(makeFillerTrials(fillerConfigsBlock2));
 timeline.push(makeCriticalTrials(criticalConfigsBlock2));
 
-// Naming test
 timeline.push(makeObjectNamingTrials(objectNamingConfigs));
-
 timeline.push(green_job_free_response_trial);
 timeline.push(yellow_job_free_response_trial);
 
-// Save to OSF
 timeline.push(save_data_trial);
-
-// Uncomment for RPP
 timeline.push(prolific_ending_block);
 timeline.push(rpp_ending_block);
 
