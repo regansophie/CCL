@@ -17,7 +17,7 @@ const CLOUD_VERSION = "no_cloud";
 const CRITICAL_AUDIO_VERSION = "unsure";
 // options: "unsure", "confident"
 
-const JOB_VERSION = "flying";
+const JOB_VERSION = "farming";
 // options: "flying", "farming"
 
 const DISTRACTOR_VERSION = "alien";
