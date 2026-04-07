@@ -476,6 +476,19 @@ function setupIntroAudioAndNext(audio) {
     };
   }
 
+  // DEBUG VERSION: never lock the Next button
+  if (DEBUG_BYPASS_AUDIO_LOCK) {
+    enableNext();
+
+    if (audio) {
+      window.currentIntroAudio = new Audio(audio);
+      window.currentIntroAudio.play().catch(err => {
+        console.warn("Intro audio failed or was blocked:", err);
+      });
+    }
+    return;
+  }
+
   if (audio) {
     disableNext();
 
@@ -2876,6 +2889,7 @@ var credit_instructions = {
 // PARTICIPANT SOURCE SELECTION
 // ==================================================
 let participantSource = null;
+let DEBUG_BYPASS_AUDIO_LOCK = false;
 
 const participant_source_page = {
   type: jsPsychHtmlButtonResponse,
@@ -2887,19 +2901,30 @@ const participant_source_page = {
       line-height: 1.6;
       font-size: 28px;
     ">
-      <p><strong>Are you completing this study on Prolific or RPP?</strong></p>
+      <p><strong>Are you completing this study on Prolific, RPP, or using the debug version?</strong></p>
       <p>Please choose the option that applies to you.</p>
     </div>
   `,
-  choices: ["RPP participant", "Prolific participant"],
+  choices: ["RPP participant", "Prolific participant", "Other"],
   on_finish: function(data) {
-    participantSource = data.response === 0 ? "RPP" : "Prolific";
+    if (data.response === 0) {
+      participantSource = "RPP";
+      DEBUG_BYPASS_AUDIO_LOCK = false;
+    } else if (data.response === 1) {
+      participantSource = "Prolific";
+      DEBUG_BYPASS_AUDIO_LOCK = false;
+    } else {
+      participantSource = "Other";
+      DEBUG_BYPASS_AUDIO_LOCK = true;
+    }
 
     jsPsych.data.addProperties({
-      participant_source: participantSource
+      participant_source: participantSource,
+      debug_bypass_audio_lock: DEBUG_BYPASS_AUDIO_LOCK
     });
 
     console.log("Participant source:", participantSource);
+    console.log("Debug bypass audio lock:", DEBUG_BYPASS_AUDIO_LOCK);
   }
 };
 
