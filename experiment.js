@@ -2901,7 +2901,7 @@ const participant_source_page = {
       line-height: 1.6;
       font-size: 28px;
     ">
-      <p><strong>Are you completing this study on Prolific, RPP, or using the debug version?</strong></p>
+      <p><strong>Are you completing this study on Prolific, RPP, or somewhere else?</strong></p>
       <p>Please choose the option that applies to you.</p>
     </div>
   `,
