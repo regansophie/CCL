@@ -57,7 +57,7 @@ const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`
 const DATAPIPE_EXPERIMENT_ID = "a09JsZ7J75Rd";
 
 const ex_version =
-  `cloud_${CLOUD_VERSION}__audio_${CRITICAL_AUDIO_VERSION}__job_${JOB_VERSION}__distractors_${DISTRACTOR_VERSION}`;
+  `cloud_${CLOUD_VERSION}__audio_${CRITICAL_AUDIO_VERSION}__job_${JOB_VERSION}__distractors_${DISTRACTOR_VERSION}_no_soccer`;
 
 jsPsych.data.addProperties({
   participant_id: participantID,
@@ -3104,6 +3104,7 @@ timeline.push(
   })
 );
 
+/*
 timeline.push(
   makeObjectIntroTrial({
     text: "",
@@ -3114,7 +3115,7 @@ timeline.push(
     audio: "stimuli/audio/intro/intro_moonball.mp3"
   })
 );
-
+*/
 
 // Game intro depends on condition
 if (speakerCondition === "same_speaker") {
