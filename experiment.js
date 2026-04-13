@@ -14,7 +14,7 @@ const jsPsych = initJsPsych({
 const CLOUD_VERSION = "no_cloud";
 // options: "cloud", "no_cloud"
 
-const CRITICAL_AUDIO_VERSION = "unsure";
+const CRITICAL_AUDIO_VERSION = "confident";
 // options: "unsure", "confident"
 
 const JOB_VERSION = "flying";
