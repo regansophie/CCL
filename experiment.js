@@ -14,7 +14,7 @@ const jsPsych = initJsPsych({
 const CLOUD_VERSION = "no_cloud";
 // options: "cloud", "no_cloud"
 
-const CRITICAL_AUDIO_VERSION = "confident";
+const CRITICAL_AUDIO_VERSION = "unsure";
 // options: "unsure", "confident"
 
 const JOB_VERSION = "flying";
@@ -22,6 +22,9 @@ const JOB_VERSION = "flying";
 
 const DISTRACTOR_VERSION = "alien";
 // options: "earth", "alien"
+
+const LABEL_VERSION  = "food";
+// options: "food", "fruit"
 
 
 // ==================================================
@@ -57,7 +60,7 @@ const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`
 const DATAPIPE_EXPERIMENT_ID = "a09JsZ7J75Rd";
 
 const ex_version =
-  `cloud_${CLOUD_VERSION}__audio_${CRITICAL_AUDIO_VERSION}__job_${JOB_VERSION}__distractors_${DISTRACTOR_VERSION}_no_soccer`;
+  `cloud_${CLOUD_VERSION}__audio_${CRITICAL_AUDIO_VERSION}__job_${JOB_VERSION}__distractors_${DISTRACTOR_VERSION}`;
 
 jsPsych.data.addProperties({
   participant_id: participantID,
@@ -322,7 +325,7 @@ function getCriticalAudio(targetObject) {
   const suffix = EXP_CONFIG.criticalAudioSuffix;
 
   if (targetObject === "starberry") {
-    return `stimuli/audio/${alienFolder}/target/fruit_${suffix}.mp3`;
+    return `stimuli/audio/${alienFolder}/target/${LABEL_VERSION}_${suffix}.mp3`;
   }
 
   if (targetObject === "rainbow_poofle") {
@@ -3104,7 +3107,6 @@ timeline.push(
   })
 );
 
-/*
 timeline.push(
   makeObjectIntroTrial({
     text: "",
@@ -3115,7 +3117,7 @@ timeline.push(
     audio: "stimuli/audio/intro/intro_moonball.mp3"
   })
 );
-*/
+
 
 // Game intro depends on condition
 if (speakerCondition === "same_speaker") {
