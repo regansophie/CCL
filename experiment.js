@@ -32,7 +32,7 @@ const LABEL_VERSION  = "fruit";
 // ==================================================
 const EXP_CONFIG = {
   useCloud: CLOUD_VERSION === "cloud",
-  criticalAudioSuffix: CRITICAL_AUDIO_VERSION === "unsure" ? "unsure" : "confident",
+  criticalAudioSuffix: CRITICAL_AUDIO_VERSION,
   jobWord: JOB_VERSION === "farming" ? "farming" : "flying",
   distractorVersion: DISTRACTOR_VERSION === "alien" ? "alien" : "earth"
 };
