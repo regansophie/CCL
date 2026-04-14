@@ -23,7 +23,7 @@ const JOB_VERSION = "flying";
 const DISTRACTOR_VERSION = "alien";
 // options: "earth", "alien"
 
-const LABEL_VERSION  = "food";
+const LABEL_VERSION  = "fruit";
 // options: "food", "fruit"
 
 
