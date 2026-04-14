@@ -17,7 +17,7 @@ const CLOUD_VERSION = "cloud";
 const CRITICAL_AUDIO_VERSION = "alternate";
 // options: "unsure", "confident", "alternate"
 
-const JOB_VERSION = "flying";
+const JOB_VERSION = "farming";
 // options: "flying", "farming"
 
 const DISTRACTOR_VERSION = "alien";
@@ -3107,6 +3107,7 @@ timeline.push(
   })
 );
 
+/*
 timeline.push(
   makeObjectIntroTrial({
     text: "",
@@ -3117,7 +3118,7 @@ timeline.push(
     audio: "stimuli/audio/intro/intro_moonball.mp3"
   })
 );
-
+*/
 
 // Game intro depends on condition
 if (speakerCondition === "same_speaker") {
