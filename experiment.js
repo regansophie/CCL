@@ -11,7 +11,7 @@ const jsPsych = initJsPsych({
 // ==================================================
 // EXPERIMENT VERSION FLAGS
 // ==================================================
-const CLOUD_VERSION = "no_cloud";
+const CLOUD_VERSION = "cloud";
 // options: "cloud", "no_cloud"
 
 const CRITICAL_AUDIO_VERSION = "alternate";
