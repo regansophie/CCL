@@ -3162,27 +3162,6 @@ timeline.push(
   })
 );
 
-timeline.push(
-  makeObjectIntroTrial({
-    text: "This is comet leaf.",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: "target",
-    objectName: "comet_leaf",
-    audio: "stimuli/audio/intro/intro_comet_leaf.mp3"
-  })
-);
-
-timeline.push(
-  makeObjectIntroTrial({
-    text: "This is a galaxy tweeter.",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: "target",
-    objectName: "galaxy_tweeter",
-    audio: "stimuli/audio/intro/intro_galaxy_tweeter.mp3"
-  })
-);
 
 timeline.push(
   makeObjectIntroTrial({
