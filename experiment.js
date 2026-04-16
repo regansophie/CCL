@@ -17,7 +17,7 @@ const CLOUD_VERSION = "cloud";
 const CRITICAL_AUDIO_VERSION = "alternate";
 // options: "unsure", "confident", "alternate"
 
-const JOB_VERSION = "farming";
+const JOB_VERSION = "flying";
 // options: "flying", "farming"
 
 const DISTRACTOR_VERSION = "alien";
@@ -25,6 +25,9 @@ const DISTRACTOR_VERSION = "alien";
 
 const LABEL_VERSION  = "fruit";
 // options: "food", "fruit"
+
+const ASK_ARE_YOU_SURE = false; 
+// options: true, false
 
 
 // ==================================================
@@ -57,7 +60,7 @@ function getTimestampID() {
 
 const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`;
 
-const DATAPIPE_EXPERIMENT_ID = "a09JsZ7J75Rd";
+const DATAPIPE_EXPERIMENT_ID = "rQoL3DKey2W8";
 
 const ex_version =
   `cloud_${CLOUD_VERSION}__audio_${CRITICAL_AUDIO_VERSION}__job_${JOB_VERSION}__distractors_${DISTRACTOR_VERSION}`;
@@ -212,7 +215,9 @@ const FILLER_OBJECTS = [
 
 const TARGET_OBJECTS = [
   "starberry",
-  "rainbow_poofle"
+  "rainbow_poofle",
+  "galaxy_tweeter",
+  "comet_leaf"
 ];
 
 const DISTRACTOR_OBJECTS =
@@ -322,14 +327,21 @@ function getFillerAudioSrc(objectName) {
 
 function getCriticalAudio(targetObject) {
   const alienFolder = getConditionAudioAlienFolder();
-  const suffix = EXP_CONFIG.criticalAudioSuffix;
 
   if (targetObject === "starberry") {
-    return `stimuli/audio/${alienFolder}/target/${LABEL_VERSION}_${suffix}.mp3`;
+    return `stimuli/audio/${alienFolder}/target/${LABEL_VERSION}_${EXP_CONFIG.criticalAudioSuffix}.mp3`;
   }
 
   if (targetObject === "rainbow_poofle") {
-    return `stimuli/audio/${alienFolder}/target/animal_${suffix}.mp3`;
+    return `stimuli/audio/${alienFolder}/target/animal_${EXP_CONFIG.criticalAudioSuffix}.mp3`;
+  }
+
+  if (targetObject === "galaxy_tweeter") {
+    return `stimuli/audio/${alienFolder}/target/bird_${EXP_CONFIG.criticalAudioSuffix}.mp3`;
+  }
+
+  if (targetObject === "comet_leaf") {
+    return `stimuli/audio/${alienFolder}/target/vegetable_${EXP_CONFIG.criticalAudioSuffix}.mp3`;
   }
 
   return null;
@@ -399,12 +411,16 @@ const AUDIO_PRELOAD = [
 
   getCriticalAudio("starberry"),
   getCriticalAudio("rainbow_poofle"),
+  getCriticalAudio("galaxy_tweeter"),
+  getCriticalAudio("comet_leaf"),
 
   "stimuli/audio/intro/intro_1.mp3",
   "stimuli/audio/intro/intro_2.mp3",
   "stimuli/audio/intro/intro_3.mp3",
   "stimuli/audio/intro/intro_starberry.mp3",
   "stimuli/audio/intro/intro_rainbow_poofle.mp3",
+  "stimuli/audio/intro/intro_galaxy_tweeter.mp3",
+  "stimuli/audio/intro/intro_comet_leaf.mp3",
   "stimuli/audio/intro/intro_new_alien.mp3",
   "stimuli/audio/intro/intro_jars_1.mp3",
   "stimuli/audio/intro/intro_jars_2.mp3",
@@ -412,6 +428,8 @@ const AUDIO_PRELOAD = [
   getJobIntroAudioPath(),
   "stimuli/audio/intro/intro_telescopes.mp3",
   "stimuli/audio/intro/intro_moonball.mp3",
+
+  
 
   ...(EXP_CONFIG.useCloud ? [getConditionCloudAudio()] : [])
 ];
@@ -2300,13 +2318,17 @@ function makeCriticalTrials(configList) {
               };
             }
           }
-
           if (leftBtn) {
             leftBtn.onclick = () => {
               jarChoiceSide = "left";
               jarChoiceColor = getJarColorFromSide("left");
               disableJarButtons();
-              showCertaintyButtons();
+
+              if (ASK_ARE_YOU_SURE) {
+                showCertaintyButtons();
+              } else {
+                finishCriticalTrial(null, null);
+              }
             };
           }
 
@@ -2315,7 +2337,12 @@ function makeCriticalTrials(configList) {
               jarChoiceSide = "right";
               jarChoiceColor = getJarColorFromSide("right");
               disableJarButtons();
-              showCertaintyButtons();
+
+              if (ASK_ARE_YOU_SURE) {
+                showCertaintyButtons();
+              } else {
+                finishCriticalTrial(null, null);
+              }
             };
           }
         }
@@ -2692,21 +2719,66 @@ const {
 
 const [criticalDistractor1, criticalDistractor2] = DISTRACTOR_OBJECTS;
 
-const criticalConfigsBlock1 = [
-  buildCriticalConfig(
-    "starberry",
-    criticalDistractor1,
-    "Choose a jar."
-  )
+
+const introObjectTrials = jsPsych.randomization.shuffle([
+  makeObjectIntroTrial({
+    text: "",
+    alienColor: GUIDE_ALIEN.color,
+    alienNumber: GUIDE_ALIEN.number,
+    objectType: "target",
+    objectName: "starberry",
+    audio: "stimuli/audio/intro/intro_starberry.mp3"
+  }),
+  makeObjectIntroTrial({
+    text: "",
+    alienColor: GUIDE_ALIEN.color,
+    alienNumber: GUIDE_ALIEN.number,
+    objectType: "target",
+    objectName: "rainbow_poofle",
+    audio: "stimuli/audio/intro/intro_rainbow_poofle.mp3"
+  }),
+  makeObjectIntroTrial({
+    text: "",
+    alienColor: GUIDE_ALIEN.color,
+    alienNumber: GUIDE_ALIEN.number,
+    objectType: "target",
+    objectName: "galaxy_tweeter",
+    audio: "stimuli/audio/intro/intro_galaxy_tweeter.mp3"
+  }),
+  makeObjectIntroTrial({
+    text: "",
+    alienColor: GUIDE_ALIEN.color,
+    alienNumber: GUIDE_ALIEN.number,
+    objectType: "target",
+    objectName: "comet_leaf",
+    audio: "stimuli/audio/intro/intro_comet_leaf.mp3"
+  })
+]);
+
+const TEST_TRIAL_SPECS = [
+  { target: "starberry", distractor: criticalDistractor1 },
+  { target: "rainbow_poofle", distractor: criticalDistractor2 },
+  { target: "galaxy_tweeter", distractor: criticalDistractor1 },
+  { target: "comet_leaf", distractor: criticalDistractor2 }
 ];
 
-const criticalConfigsBlock2 = [
-  buildCriticalConfig(
-    "rainbow_poofle",
-    criticalDistractor2,
-    "Choose a jar."
+const criticalConfigsAll = jsPsych.randomization.shuffle(
+  TEST_TRIAL_SPECS.map(spec =>
+    buildCriticalConfig(spec.target, spec.distractor, "Choose a jar.")
   )
+);
+
+const firstFillerConfigs = [fillerConfigsBlock1[0]];
+
+const remainingFillerConfigs = [
+  ...fillerConfigsBlock1.slice(1),
+  ...fillerConfigsBlock2
 ];
+
+const mixedConfigs = jsPsych.randomization.shuffle([
+  ...remainingFillerConfigs,
+  ...criticalConfigsAll
+]);
 
 const objectNamingConfigs = jsPsych.randomization.shuffle([
   {
@@ -2724,6 +2796,22 @@ const objectNamingConfigs = jsPsych.randomization.shuffle([
     alienNumber: TASK_ALIEN.number,
     objectType: "target",
     objectName: "rainbow_poofle"
+  },
+  {
+    alienId: TASK_ALIEN.id,
+    alienName: TASK_ALIEN.name,
+    alienColor: TASK_ALIEN.color,
+    alienNumber: TASK_ALIEN.number,
+    objectType: "target",
+    objectName: "galaxy_tweeter"
+  },
+  {
+    alienId: TASK_ALIEN.id,
+    alienName: TASK_ALIEN.name,
+    alienColor: TASK_ALIEN.color,
+    alienNumber: TASK_ALIEN.number,
+    objectType: "target",
+    objectName: "comet_leaf"
   }
 ]);
 
@@ -3076,6 +3164,28 @@ timeline.push(
 
 timeline.push(
   makeObjectIntroTrial({
+    text: "This is comet leaf.",
+    alienColor: GUIDE_ALIEN.color,
+    alienNumber: GUIDE_ALIEN.number,
+    objectType: "target",
+    objectName: "comet_leaf",
+    audio: "stimuli/audio/intro/intro_comet_leaf.mp3"
+  })
+);
+
+timeline.push(
+  makeObjectIntroTrial({
+    text: "This is a galaxy tweeter.",
+    alienColor: GUIDE_ALIEN.color,
+    alienNumber: GUIDE_ALIEN.number,
+    objectType: "target",
+    objectName: "galaxy_tweeter",
+    audio: "stimuli/audio/intro/intro_galaxy_tweeter.mp3"
+  })
+);
+
+timeline.push(
+  makeObjectIntroTrial({
     text: "",
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
@@ -3107,8 +3217,7 @@ timeline.push(
   })
 );
 
-/*
-timeline.push(
+/*timeline.push(
   makeObjectIntroTrial({
     text: "",
     alienColor: GUIDE_ALIEN.color,
@@ -3117,8 +3226,8 @@ timeline.push(
     objectName: "images/moonball.png",
     audio: "stimuli/audio/intro/intro_moonball.mp3"
   })
-);
-*/
+);*/
+
 
 // Game intro depends on condition
 if (speakerCondition === "same_speaker") {
@@ -3156,6 +3265,7 @@ if (speakerCondition === "same_speaker") {
   );
 }
 
+
 timeline.push(makePracticeTrials(practiceConfigs));
 
 if (EXP_CONFIG.useCloud) {
@@ -3169,12 +3279,21 @@ if (EXP_CONFIG.useCloud) {
   );
 }
 
-timeline.push(makeFillerTrials(fillerConfigsBlock1));
-timeline.push(makeCriticalTrials(criticalConfigsBlock1));
-timeline.push(makeFillerTrials(fillerConfigsBlock2));
-timeline.push(makeCriticalTrials(criticalConfigsBlock2));
+
+// At least one filler first
+timeline.push(makeFillerTrials(firstFillerConfigs));
+
+// Then randomize remaining fillers + all critical trials
+mixedConfigs.forEach(config => {
+  if (config.phase === "critical") {
+    timeline.push(makeCriticalTrials([config]));
+  } else {
+    timeline.push(makeFillerTrials([config]));
+  }
+});
 
 timeline.push(makeObjectNamingTrials(objectNamingConfigs));
+
 timeline.push(green_job_free_response_trial);
 timeline.push(yellow_job_free_response_trial);
 
