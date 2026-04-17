@@ -2796,22 +2796,6 @@ const objectNamingConfigs = jsPsych.randomization.shuffle([
     alienNumber: TASK_ALIEN.number,
     objectType: "target",
     objectName: "rainbow_poofle"
-  },
-  {
-    alienId: TASK_ALIEN.id,
-    alienName: TASK_ALIEN.name,
-    alienColor: TASK_ALIEN.color,
-    alienNumber: TASK_ALIEN.number,
-    objectType: "target",
-    objectName: "galaxy_tweeter"
-  },
-  {
-    alienId: TASK_ALIEN.id,
-    alienName: TASK_ALIEN.name,
-    alienColor: TASK_ALIEN.color,
-    alienNumber: TASK_ALIEN.number,
-    objectType: "target",
-    objectName: "comet_leaf"
   }
 ]);
 
