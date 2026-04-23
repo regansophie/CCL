@@ -3258,8 +3258,10 @@ mixedConfigs.forEach(config => {
 
 timeline.push(makeObjectNamingTrials(objectNamingConfigs));
 
+/*
 timeline.push(green_job_free_response_trial);
 timeline.push(yellow_job_free_response_trial);
+*/
 
 timeline.push(save_data_trial);
 timeline.push(prolific_ending_block);
