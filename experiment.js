@@ -60,7 +60,7 @@ function getTimestampID() {
 
 const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`;
 
-const DATAPIPE_EXPERIMENT_ID = "uMk4JHmXkURH";
+const DATAPIPE_EXPERIMENT_ID = "gffj3WVfEYl2";
 
 const ex_version =
   `cloud_${CLOUD_VERSION}__audio_${CRITICAL_AUDIO_VERSION}__job_${JOB_VERSION}__distractors_${DISTRACTOR_VERSION}`;
@@ -3146,7 +3146,7 @@ timeline.push(
   })
 );
 
-
+/*
 timeline.push(
   makeObjectIntroTrial({
     text: "",
@@ -3156,8 +3156,9 @@ timeline.push(
     objectName: null,
     audio: "stimuli/audio/intro/intro_3.mp3"
   })
-);
+);*/
 
+/*
 timeline.push(
   makeObjectIntroTrial({
     text: "",
@@ -3178,7 +3179,7 @@ timeline.push(
     objectName: "images/telescopes.png",
     audio: "stimuli/audio/intro/intro_telescopes.mp3"
   })
-);
+); */
 
 /*timeline.push(
   makeObjectIntroTrial({
