@@ -2722,7 +2722,7 @@ const [criticalDistractor1, criticalDistractor2] = DISTRACTOR_OBJECTS;
 
 const introObjectTrials = jsPsych.randomization.shuffle([
   makeObjectIntroTrial({
-    text: "",
+    text: "Choose a jar.",
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
     objectType: "target",
@@ -2730,7 +2730,7 @@ const introObjectTrials = jsPsych.randomization.shuffle([
     audio: "stimuli/audio/intro/intro_starberry.mp3"
   }),
   makeObjectIntroTrial({
-    text: "",
+    text: "Choose a jar.",
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
     objectType: "target",
@@ -2738,7 +2738,7 @@ const introObjectTrials = jsPsych.randomization.shuffle([
     audio: "stimuli/audio/intro/intro_rainbow_poofle.mp3"
   }),
   makeObjectIntroTrial({
-    text: "",
+    text: "Choose a jar.",
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
     objectType: "target",
@@ -2746,7 +2746,7 @@ const introObjectTrials = jsPsych.randomization.shuffle([
     audio: "stimuli/audio/intro/intro_galaxy_tweeter.mp3"
   }),
   makeObjectIntroTrial({
-    text: "",
+    text: "Choose a jar.",
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
     objectType: "target",
