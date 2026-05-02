@@ -17,7 +17,7 @@ const CLOUD_VERSION = "cloud";
 const CRITICAL_AUDIO_VERSION = "alternate";
 // options: "unsure", "confident", "alternate"
 
-const JOB_VERSION = "flying";
+const JOB_VERSION = "farming";
 // options: "flying", "farming"
 
 const DISTRACTOR_VERSION = "alien";
@@ -60,7 +60,7 @@ function getTimestampID() {
 
 const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`;
 
-const DATAPIPE_EXPERIMENT_ID = "gffj3WVfEYl2";
+const DATAPIPE_EXPERIMENT_ID = "01w6ornRQcar";
 
 const ex_version =
   `cloud_${CLOUD_VERSION}__audio_${CRITICAL_AUDIO_VERSION}__job_${JOB_VERSION}__distractors_${DISTRACTOR_VERSION}`;
@@ -3146,7 +3146,7 @@ timeline.push(
   })
 );
 
-/*
+
 timeline.push(
   makeObjectIntroTrial({
     text: "",
@@ -3156,9 +3156,9 @@ timeline.push(
     objectName: null,
     audio: "stimuli/audio/intro/intro_3.mp3"
   })
-);*/
+);
 
-/*
+
 timeline.push(
   makeObjectIntroTrial({
     text: "",
@@ -3179,7 +3179,7 @@ timeline.push(
     objectName: "images/telescopes.png",
     audio: "stimuli/audio/intro/intro_telescopes.mp3"
   })
-); */
+);
 
 /*timeline.push(
   makeObjectIntroTrial({
@@ -3258,10 +3258,10 @@ mixedConfigs.forEach(config => {
 
 timeline.push(makeObjectNamingTrials(objectNamingConfigs));
 
-/*
+
 timeline.push(green_job_free_response_trial);
 timeline.push(yellow_job_free_response_trial);
-*/
+
 
 timeline.push(save_data_trial);
 timeline.push(prolific_ending_block);
