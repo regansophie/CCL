@@ -1,11 +1,7 @@
 // ==================================================
 // BASIC SETUP
 // ==================================================
-const jsPsych = initJsPsych({
-  on_finish: function() {
-    jsPsych.data.displayData();
-  }
-});
+const jsPsych = initJsPsych();
 
 
 // ==================================================
@@ -3029,6 +3025,26 @@ var credit_instructions = {
   `
 };
 
+var close_window_page = {
+  type: jsPsychHtmlKeyboardResponse,
+  choices: "NO_KEYS",
+  stimulus: `
+    <div style="
+      font-size: 24px;
+      line-height: 1.5;
+      color: black;
+      max-width: 800px;
+      margin: 0 auto;
+      padding-top: 10%;
+      text-align: center;
+    ">
+      <p>Thank you for participating!</p>
+      <p style="margin-top: 20px;">Your responses have been saved.</p>
+      <p style="margin-top: 30px;">You may now close this window.</p>
+    </div>
+  `
+};
+
 
 // ==================================================
 // PARTICIPANT SOURCE SELECTION
@@ -3106,6 +3122,13 @@ const rpp_ending_block = {
   timeline: [credit_instructions],
   conditional_function: function() {
     return participantSource === "RPP";
+  }
+};
+
+const other_ending_block = {
+  timeline: [close_window_page],
+  conditional_function: function() {
+    return participantSource === "Other";
   }
 };
 
@@ -3307,5 +3330,6 @@ timeline.push(yellow_job_free_response_trial);
 timeline.push(save_data_trial);
 timeline.push(prolific_ending_block);
 timeline.push(rpp_ending_block);
+timeline.push(other_ending_block);
 
 jsPsych.run(timeline);
