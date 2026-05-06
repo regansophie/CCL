@@ -311,15 +311,15 @@ function getConditionAudioAlienFolder() {
 
 function getConditionCloudAudio() {
   if (speakerCondition === "same_speaker") {
-    return "stimuli/audio/old intro/cloud_1.mp3";
+    return "stimuli/audio/intro/cloud_1.mp3";
   }
 
   if (speakerCondition === "new_same_group") {
-    return "stimuli/audio/old intro/cloud_2.mp3";
+    return "stimuli/audio/intro/cloud_2.mp3";
   }
 
   if (speakerCondition === "new_different_group") {
-    return "stimuli/audio/old intro/cloud_3.mp3";
+    return "stimuli/audio/intro/cloud_3.mp3";
   }
 
   throw new Error(`Unknown speaker condition: ${speakerCondition}`);
