@@ -17,8 +17,8 @@ const CLOUD_VERSION = "cloud";
 const CRITICAL_AUDIO_VERSION = "alternate";
 // options: "unsure", "confident", "alternate"
 
-const JOB_VERSION = "farming";
-// options: "flying", "farming"
+const JOB_VERSION = "forest_ranger_astronomer";
+// options: "forest_ranger_astronomer"
 
 const DISTRACTOR_VERSION = "alien";
 // options: "earth", "alien"
@@ -36,7 +36,6 @@ const ASK_ARE_YOU_SURE = false;
 const EXP_CONFIG = {
   useCloud: CLOUD_VERSION === "cloud",
   criticalAudioSuffix: CRITICAL_AUDIO_VERSION,
-  jobWord: JOB_VERSION === "farming" ? "farming" : "flying",
   distractorVersion: DISTRACTOR_VERSION === "alien" ? "alien" : "earth"
 };
 
@@ -60,7 +59,7 @@ function getTimestampID() {
 
 const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`;
 
-const DATAPIPE_EXPERIMENT_ID = "01w6ornRQcar";
+const DATAPIPE_EXPERIMENT_ID = "PgYGDIf1lVn3";
 
 const ex_version =
   `cloud_${CLOUD_VERSION}__audio_${CRITICAL_AUDIO_VERSION}__job_${JOB_VERSION}__distractors_${DISTRACTOR_VERSION}`;
@@ -178,6 +177,21 @@ const GUIDE_ALIEN = CONDITION_ALIENS.introAlien;
 const TASK_ALIEN = CONDITION_ALIENS.taskAlien;
 const ALIEN_HEIGHT = "24vh";
 
+const NEW_INTRO_AUDIO_DIR = "stimuli/audio/intro";
+
+const INTRO_SCRIPT = {
+  intro_1: `Welcome to the planet Zorali. This is a planet in outer space, and I am going to tell you a little bit about it. A lot of aliens live here. I am going to tell you about two special groups of aliens.`,
+  intro_astronomers: `First, I will tell you about the astronomer aliens. You can tell if an alien is an astronomer alien because they are all yellow. The astronomer aliens love to look at stars and planets through telescopes. Sometimes, they discover new planets or stars. Being an astronomer is a hard job, and you need to go to astronomer school for a long time to do it.`,
+  intro_forest_rangers: `Now, I'll tell you about another group of special aliens. These aliens are forest rangers, and their main job is to take care of all sorts of animals. You can tell if an alien is a forest ranger because they are all green. The forest ranger aliens love to take care of all sorts of different animals. Sometimes, they discover new animals. Being a forest ranger is a hard job, and you need to go to forest ranger school for a long time to do it.`,
+  intro_2: `Here is a green alien named Borp. Borp is going to tell you about some of the interesting animals the forest rangers take care of on this planet.`,
+  intro_star_poofle: `Hi there, I'm glad you are interested in learning more about some of the animals that live on this planet. First, I'll tell you about the star poofle. Star poofles are very interesting animals. They live in the forest on our planet. They like to run around very quickly, and they can also fly. Can you say star poofle?`,
+  intro_star_berry: `Next, I'll tell you about what star poofles love to eat. This is a star berry. Star poofles love to eat star berries. Star berries are sweet fruits that grow on bushes in the forest on our planet. Can you say star berry?`,
+  intro_astro_tweeter: `Here is another animal. This is an astro tweeter. Astro tweeters are also interesting animals, and they live in the forest on our planet too. They live in nests that they build in trees, and they like to fly around. Can you say astro tweeter?`,
+  intro_astro_leaf: `Next, I'll tell you about what astro tweeters love to eat. This is astro leaf. Astro tweeters love to eat astro leaf. Astro leaf is a crunchy vegetable that grows in the ground in the forest on our planet. Can you say astro leaf?`,
+  intro_jars_same: `Now, you are going to help Borp sort some jars.`,
+  intro_jars_new: `Now, let's meet a new alien. You are going to help this alien sort some jars.`
+};
+
 
 // ==================================================
 // EXPERIMENT COUNTS
@@ -214,10 +228,10 @@ const FILLER_OBJECTS = [
 ];
 
 const TARGET_OBJECTS = [
-  "starberry",
-  "rainbow_poofle",
-  "galaxy_tweeter",
-  "comet_leaf"
+  "star_berry",
+  "star_poofle",
+  "astro_tweeter",
+  "astro_leaf"
 ];
 
 const DISTRACTOR_OBJECTS =
@@ -271,16 +285,8 @@ function getRandomSide() {
   return Math.random() < 0.5 ? "left" : "right";
 }
 
-function getJobWord() {
-  return EXP_CONFIG.jobWord;
-}
-
-function getJobImagePath() {
-  return `images/${getJobWord()}.png`;
-}
-
-function getJobIntroAudioPath() {
-  return `stimuli/audio/intro/intro_${getJobWord()}.mp3`;
+function getNewIntroAudioPath(introName) {
+  return `${NEW_INTRO_AUDIO_DIR}/${introName}.mp3`;
 }
 
 
@@ -305,15 +311,15 @@ function getConditionAudioAlienFolder() {
 
 function getConditionCloudAudio() {
   if (speakerCondition === "same_speaker") {
-    return "stimuli/audio/intro/cloud_1.mp3";
+    return "stimuli/audio/old intro/cloud_1.mp3";
   }
 
   if (speakerCondition === "new_same_group") {
-    return "stimuli/audio/intro/cloud_2.mp3";
+    return "stimuli/audio/old intro/cloud_2.mp3";
   }
 
   if (speakerCondition === "new_different_group") {
-    return "stimuli/audio/intro/cloud_3.mp3";
+    return "stimuli/audio/old intro/cloud_3.mp3";
   }
 
   throw new Error(`Unknown speaker condition: ${speakerCondition}`);
@@ -328,19 +334,19 @@ function getFillerAudioSrc(objectName) {
 function getCriticalAudio(targetObject) {
   const alienFolder = getConditionAudioAlienFolder();
 
-  if (targetObject === "starberry") {
+  if (targetObject === "star_berry") {
     return `stimuli/audio/${alienFolder}/target/${LABEL_VERSION}_${EXP_CONFIG.criticalAudioSuffix}.mp3`;
   }
 
-  if (targetObject === "rainbow_poofle") {
+  if (targetObject === "star_poofle") {
     return `stimuli/audio/${alienFolder}/target/animal_${EXP_CONFIG.criticalAudioSuffix}.mp3`;
   }
 
-  if (targetObject === "galaxy_tweeter") {
+  if (targetObject === "astro_tweeter") {
     return `stimuli/audio/${alienFolder}/target/bird_${EXP_CONFIG.criticalAudioSuffix}.mp3`;
   }
 
-  if (targetObject === "comet_leaf") {
+  if (targetObject === "astro_leaf") {
     return `stimuli/audio/${alienFolder}/target/vegetable_${EXP_CONFIG.criticalAudioSuffix}.mp3`;
   }
 
@@ -349,15 +355,11 @@ function getCriticalAudio(targetObject) {
 
 function getJarsIntroAudio() {
   if (speakerCondition === "same_speaker") {
-    return "stimuli/audio/intro/intro_jars_1.mp3";
+    return getNewIntroAudioPath("intro_jars_same");
   }
 
-  if (speakerCondition === "new_same_group") {
-    return "stimuli/audio/intro/intro_jars_2.mp3";
-  }
-
-  if (speakerCondition === "new_different_group") {
-    return "stimuli/audio/intro/intro_jars_3.mp3";
+  if (speakerCondition === "new_same_group" || speakerCondition === "new_different_group") {
+    return getNewIntroAudioPath("intro_jars_new");
   }
 
   return null;
@@ -397,9 +399,8 @@ const IMAGE_PRELOAD = [
   "stimuli/jars/orange_jar.png",
   "stimuli/jars/purple_jar.png",
 
-  getJobImagePath(),
-  "images/telescopes.png",
-  "images/moonball.png",
+  "images/astronomer.png",
+  "images/forest_ranger.png",
 
   ...FILLER_OBJECTS.map(obj => `stimuli/objects/filler/${obj}.png`),
   ...TARGET_OBJECTS.map(obj => `stimuli/objects/target/${obj}.png`),
@@ -409,27 +410,21 @@ const IMAGE_PRELOAD = [
 const AUDIO_PRELOAD = [
   ...FILLER_OBJECTS.map(obj => getFillerAudioSrc(obj)),
 
-  getCriticalAudio("starberry"),
-  getCriticalAudio("rainbow_poofle"),
-  getCriticalAudio("galaxy_tweeter"),
-  getCriticalAudio("comet_leaf"),
+  getCriticalAudio("star_berry"),
+  getCriticalAudio("star_poofle"),
+  getCriticalAudio("astro_tweeter"),
+  getCriticalAudio("astro_leaf"),
 
-  "stimuli/audio/intro/intro_1.mp3",
-  "stimuli/audio/intro/intro_2.mp3",
-  "stimuli/audio/intro/intro_3.mp3",
-  "stimuli/audio/intro/intro_starberry.mp3",
-  "stimuli/audio/intro/intro_rainbow_poofle.mp3",
-  "stimuli/audio/intro/intro_galaxy_tweeter.mp3",
-  "stimuli/audio/intro/intro_comet_leaf.mp3",
-  "stimuli/audio/intro/intro_new_alien.mp3",
-  "stimuli/audio/intro/intro_jars_1.mp3",
-  "stimuli/audio/intro/intro_jars_2.mp3",
-  "stimuli/audio/intro/intro_jars_3.mp3",
-  getJobIntroAudioPath(),
-  "stimuli/audio/intro/intro_telescopes.mp3",
-  "stimuli/audio/intro/intro_moonball.mp3",
-
-  
+  getNewIntroAudioPath("intro_1"),
+  getNewIntroAudioPath("intro_astronomers"),
+  getNewIntroAudioPath("intro_forest_rangers"),
+  getNewIntroAudioPath("intro_2"),
+  getNewIntroAudioPath("intro_star_poofle"),
+  getNewIntroAudioPath("intro_star_berry"),
+  getNewIntroAudioPath("intro_astro_tweeter"),
+  getNewIntroAudioPath("intro_astro_leaf"),
+  getNewIntroAudioPath("intro_jars_same"),
+  getNewIntroAudioPath("intro_jars_new"),
 
   ...(EXP_CONFIG.useCloud ? [getConditionCloudAudio()] : [])
 ];
@@ -584,6 +579,8 @@ function renderCertaintyControls() {
 // ==================================================
 function renderAllAliensIntroScreen({
   text = "",
+  alienGroup = "both",
+  illustrationSrc = null,
   showNextButton = true
 } = {}) {
   const leftAliens = [
@@ -629,18 +626,36 @@ function renderAllAliensIntroScreen({
         ${text}
       </div>
 
-      <div style="
+      ${illustrationSrc ? `
+        <div style="
+          position:absolute;
+          left:50%;
+          top:55%;
+          transform:translate(-50%, -50%);
+          z-index:10;
+        ">
+          <img
+            src="${illustrationSrc}"
+            style="
+              height:42vh;
+              max-width:44vw;
+              object-fit:contain;
+              display:block;
+            "
+          >
+        </div>
+      ` : `<div style="
         position:absolute;
         bottom:18%;
         left:50%;
         transform:translateX(-50%);
         width:88%;
         display:flex;
-        justify-content:space-between;
+        justify-content:${alienGroup === "both" ? "space-between" : "center"};
         align-items:flex-end;
         z-index:10;
       ">
-        <div style="
+        ${alienGroup !== "yellow" ? `<div style="
           display:flex;
           gap:1.5vw;
           align-items:flex-end;
@@ -655,9 +670,9 @@ function renderAllAliensIntroScreen({
               "
             >
           `).join("")}
-        </div>
+        </div>` : ""}
 
-        <div style="
+        ${alienGroup !== "green" ? `<div style="
           display:flex;
           gap:1.5vw;
           align-items:flex-end;
@@ -672,8 +687,8 @@ function renderAllAliensIntroScreen({
               "
             >
           `).join("")}
-        </div>
-      </div>
+        </div>` : ""}
+      </div>`}
 
       ${showNextButton ? `
         <div style="
@@ -1908,7 +1923,7 @@ function buildCriticalConfig(targetName, distractorName, blockLabel, trialIndex)
   }
 
   return {
-    headerText: "",
+    headerText: blockLabel,
     alienId: TASK_ALIEN.id,
     alienName: TASK_ALIEN.name,
     alienColor: TASK_ALIEN.color,
@@ -2356,18 +2371,26 @@ function makeCriticalTrials(configList) {
 // ==================================================
 // INTRO TRIALS
 // ==================================================
-function makeAllAliensIntroTrial(text, audio = null) {
+function makeAllAliensIntroTrial(
+  text,
+  audio = null,
+  scriptText = text,
+  alienGroup = "both",
+  illustrationSrc = null
+) {
   return {
     type: jsPsychHtmlKeyboardResponse,
     choices: "NO_KEYS",
     stimulus: renderAllAliensIntroScreen({
       text,
+      alienGroup,
+      illustrationSrc,
       showNextButton: true
     }),
     data: {
       trial_type: "intro_all_aliens",
       speaker_condition: speakerCondition,
-      intro_text: text,
+      intro_text: scriptText,
       audio: audio
     },
     on_load: function() {
@@ -2379,7 +2402,7 @@ function makeAllAliensIntroTrial(text, audio = null) {
   };
 }
 
-function makeSingleAlienIntroTrial(text, alienColor, alienNumber, alienName, audio = null) {
+function makeSingleAlienIntroTrial(text, alienColor, alienNumber, alienName, audio = null, scriptText = text) {
   return {
     type: jsPsychHtmlKeyboardResponse,
     choices: "NO_KEYS",
@@ -2392,7 +2415,7 @@ function makeSingleAlienIntroTrial(text, alienColor, alienNumber, alienName, aud
     data: {
       trial_type: "intro_single_alien",
       speaker_condition: speakerCondition,
-      intro_text: text,
+      intro_text: scriptText,
       alien_name: alienName,
       alien_color: alienColor,
       alien_number: alienNumber,
@@ -2413,7 +2436,8 @@ function makeObjectIntroTrial({
   alienNumber = 1,
   objectType = null,
   objectName = null,
-  audio = null
+  audio = null,
+  scriptText = text
 }) {
   return {
     type: jsPsychHtmlKeyboardResponse,
@@ -2429,7 +2453,7 @@ function makeObjectIntroTrial({
     data: {
       trial_type: "intro_object",
       speaker_condition: speakerCondition,
-      intro_text: text,
+      intro_text: scriptText,
       alien_color: alienColor,
       alien_number: alienNumber,
       object_type: objectType,
@@ -2453,7 +2477,8 @@ function makeTwoAlienIntroTrial({
   rightAlienName,
   rightAlienColor,
   rightAlienNumber,
-  audio = null
+  audio = null,
+  scriptText = text
 }) {
   return {
     type: jsPsychHtmlKeyboardResponse,
@@ -2469,7 +2494,7 @@ function makeTwoAlienIntroTrial({
     data: {
       trial_type: "intro_two_aliens",
       speaker_condition: speakerCondition,
-      intro_text: text,
+      intro_text: scriptText,
       left_alien_name: leftAlienName,
       left_alien_color: leftAlienColor,
       left_alien_number: leftAlienNumber,
@@ -2492,7 +2517,8 @@ function makeGameIntroTrial({
   alienName,
   alienColor,
   alienNumber,
-  audio = null
+  audio = null,
+  scriptText = text
 }) {
   return {
     type: jsPsychHtmlKeyboardResponse,
@@ -2506,7 +2532,7 @@ function makeGameIntroTrial({
     data: {
       trial_type: "intro_game",
       speaker_condition: speakerCondition,
-      intro_text: text,
+      intro_text: scriptText,
       alien_name: alienName,
       alien_color: alienColor,
       alien_number: alienNumber,
@@ -2525,7 +2551,8 @@ function makeCloudIntroTrial({
   text,
   alienColor,
   alienNumber,
-  audio = null
+  audio = null,
+  scriptText = text
 }) {
   return {
     type: jsPsychHtmlKeyboardResponse,
@@ -2539,7 +2566,7 @@ function makeCloudIntroTrial({
     data: {
       trial_type: "intro_cloud",
       speaker_condition: speakerCondition,
-      intro_text: text,
+      intro_text: scriptText,
       alien_color: alienColor,
       alien_number: alienNumber,
       audio: audio
@@ -2636,44 +2663,10 @@ function makeAlienJobFreeResponseTrial({
   ).join("");
 
   return {
-    type: jsPsychSurveyText,
-    questions: [
-      {
-        prompt: `
-          <div style="
-            text-align:center;
-            width:100%;
-          ">
-            <div style="
-              font-size:3vw;
-              line-height:1.6;
-              color:white;
-              text-shadow:3px 3px 6px rgba(0,0,0,0.7);
-              margin-bottom:30px;
-            ">
-              ${promptText}
-            </div>
-
-            <div style="
-              display:flex;
-              gap:2vw;
-              align-items:flex-end;
-              justify-content:center;
-              margin-bottom:30px;
-            ">
-              ${alienImgs}
-            </div>
-          </div>
-        `,
-        name: "job_response",
-        required: true,
-        rows: 1,
-        columns: 50,
-        placeholder: "Type your answer here"
-      }
-    ],
-    preamble: `
-      <div style="position:fixed; inset:0; overflow:hidden; z-index:-1;">
+    type: jsPsychHtmlKeyboardResponse,
+    choices: "NO_KEYS",
+    stimulus: `
+      <div style="position:fixed; inset:0; overflow:hidden;">
         <img
           src="images/background.png"
           style="
@@ -2684,15 +2677,111 @@ function makeAlienJobFreeResponseTrial({
             object-fit:cover;
           "
         >
+
+        <div style="
+          position:absolute;
+          top:10%;
+          left:50%;
+          transform:translateX(-50%);
+          width:70%;
+          text-align:center;
+          font-size:3vw;
+          line-height:1.6;
+          color:white;
+          text-shadow:3px 3px 6px rgba(0,0,0,0.7);
+          z-index:10;
+        ">
+          ${promptText}
+        </div>
+
+        <div style="
+          position:absolute;
+          left:50%;
+          top:45%;
+          transform:translate(-50%, -50%);
+          display:flex;
+          gap:2vw;
+          align-items:flex-end;
+          justify-content:center;
+          z-index:10;
+        ">
+          ${alienImgs}
+        </div>
+
+        <div style="
+          position:absolute;
+          left:50%;
+          top:68%;
+          transform:translateX(-50%);
+          width:70%;
+          text-align:center;
+          z-index:20;
+        ">
+          <input
+            id="jobNameInput"
+            type="text"
+            autocomplete="off"
+            placeholder="Type your answer here"
+            style="
+              width:60%;
+              max-width:500px;
+              font-size:24px;
+              padding:12px 16px;
+              border-radius:12px;
+              border:2px solid #ccc;
+              box-sizing:border-box;
+            "
+          >
+        </div>
+
+        <div style="
+          position:absolute;
+          bottom:8%;
+          left:50%;
+          transform:translateX(-50%);
+          z-index:20;
+        ">
+          <button
+            id="jobNameNextButton"
+            style="
+              font-size:24px;
+              padding:12px 28px;
+              border-radius:12px;
+              cursor:pointer;
+            "
+          >
+            Next →
+          </button>
+        </div>
       </div>
     `,
     data: {
       trial_type: "alien_job_free_response",
       alien_color_question: alienColor
     },
-    on_finish: function(data) {
-      const response = data.response || {};
-      data.job_response = response.job_response || "";
+    on_load: function() {
+      const input = document.getElementById("jobNameInput");
+      const nextBtn = document.getElementById("jobNameNextButton");
+
+      if (input) {
+        input.focus();
+        input.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (nextBtn) nextBtn.click();
+          }
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.onclick = () => {
+          const jobResponse = input ? input.value.trim() : "";
+
+          jsPsych.finishTrial({
+            job_response: jobResponse
+          });
+        };
+      }
     }
   };
 }
@@ -2720,46 +2809,11 @@ const {
 const [criticalDistractor1, criticalDistractor2] = DISTRACTOR_OBJECTS;
 
 
-const introObjectTrials = jsPsych.randomization.shuffle([
-  makeObjectIntroTrial({
-    text: "Choose a jar.",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: "target",
-    objectName: "starberry",
-    audio: "stimuli/audio/intro/intro_starberry.mp3"
-  }),
-  makeObjectIntroTrial({
-    text: "Choose a jar.",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: "target",
-    objectName: "rainbow_poofle",
-    audio: "stimuli/audio/intro/intro_rainbow_poofle.mp3"
-  }),
-  makeObjectIntroTrial({
-    text: "Choose a jar.",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: "target",
-    objectName: "galaxy_tweeter",
-    audio: "stimuli/audio/intro/intro_galaxy_tweeter.mp3"
-  }),
-  makeObjectIntroTrial({
-    text: "Choose a jar.",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: "target",
-    objectName: "comet_leaf",
-    audio: "stimuli/audio/intro/intro_comet_leaf.mp3"
-  })
-]);
-
 const TEST_TRIAL_SPECS = [
-  { target: "starberry", distractor: criticalDistractor1 },
-  { target: "rainbow_poofle", distractor: criticalDistractor2 },
-  { target: "galaxy_tweeter", distractor: criticalDistractor1 },
-  { target: "comet_leaf", distractor: criticalDistractor2 }
+  { target: "star_berry", distractor: criticalDistractor1 },
+  { target: "star_poofle", distractor: criticalDistractor2 },
+  { target: "astro_tweeter", distractor: criticalDistractor1 },
+  { target: "astro_leaf", distractor: criticalDistractor2 }
 ];
 
 const criticalConfigsAll = jsPsych.randomization.shuffle(
@@ -2787,7 +2841,7 @@ const objectNamingConfigs = jsPsych.randomization.shuffle([
     alienColor: TASK_ALIEN.color,
     alienNumber: TASK_ALIEN.number,
     objectType: "target",
-    objectName: "starberry"
+    objectName: "star_berry"
   },
   {
     alienId: TASK_ALIEN.id,
@@ -2795,7 +2849,23 @@ const objectNamingConfigs = jsPsych.randomization.shuffle([
     alienColor: TASK_ALIEN.color,
     alienNumber: TASK_ALIEN.number,
     objectType: "target",
-    objectName: "rainbow_poofle"
+    objectName: "star_poofle"
+  },
+  {
+    alienId: TASK_ALIEN.id,
+    alienName: TASK_ALIEN.name,
+    alienColor: TASK_ALIEN.color,
+    alienNumber: TASK_ALIEN.number,
+    objectType: "target",
+    objectName: "astro_tweeter"
+  },
+  {
+    alienId: TASK_ALIEN.id,
+    alienName: TASK_ALIEN.name,
+    alienColor: TASK_ALIEN.color,
+    alienNumber: TASK_ALIEN.number,
+    objectType: "target",
+    objectName: "astro_leaf"
   }
 ]);
 
@@ -3091,140 +3161,113 @@ timeline.push(volume_check_screen);
 // Intro sequence
 timeline.push(
   makeAllAliensIntroTrial(
-    `This is a planet in outer space called ${PLANET_NAME}.`,
-    null
+    `Welcome to the planet ${PLANET_NAME}.`,
+    getNewIntroAudioPath("intro_1"),
+    INTRO_SCRIPT.intro_1,
+    "both"
   )
 );
 
 timeline.push(
   makeAllAliensIntroTrial(
-    "Here are some of the aliens who live here.",
-    null
+    "These are the astronomer aliens.",
+    getNewIntroAudioPath("intro_astronomers"),
+    INTRO_SCRIPT.intro_astronomers,
+    "yellow",
+    "images/astronomer.png"
+  )
+);
+
+timeline.push(
+  makeAllAliensIntroTrial(
+    "These are the forest ranger aliens.",
+    getNewIntroAudioPath("intro_forest_rangers"),
+    INTRO_SCRIPT.intro_forest_rangers,
+    "green",
+    "images/forest_ranger.png"
   )
 );
 
 timeline.push(
   makeSingleAlienIntroTrial(
-    `Let's meet ${GUIDE_ALIEN.name}. He is going to tell us more about the planet.`,
+    `This is ${GUIDE_ALIEN.name}.`,
     GUIDE_ALIEN.color,
     GUIDE_ALIEN.number,
     GUIDE_ALIEN.name,
-    "stimuli/audio/intro/intro_1.mp3"
+    getNewIntroAudioPath("intro_2"),
+    INTRO_SCRIPT.intro_2
   )
 );
 
 timeline.push(
   makeObjectIntroTrial({
-    text: "",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: null,
-    objectName: null,
-    audio: "stimuli/audio/intro/intro_2.mp3"
-  })
-);
-
-timeline.push(
-  makeObjectIntroTrial({
-    text: "This is a starberry.",
+    text: "This is a star poofle.",
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
     objectType: "target",
-    objectName: "starberry",
-    audio: "stimuli/audio/intro/intro_starberry.mp3"
+    objectName: "star_poofle",
+    audio: getNewIntroAudioPath("intro_star_poofle"),
+    scriptText: INTRO_SCRIPT.intro_star_poofle
   })
 );
 
 timeline.push(
   makeObjectIntroTrial({
-    text: "This is a rainbow poofle.",
+    text: "This is a star berry.",
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
     objectType: "target",
-    objectName: "rainbow_poofle",
-    audio: "stimuli/audio/intro/intro_rainbow_poofle.mp3"
-  })
-);
-
-
-timeline.push(
-  makeObjectIntroTrial({
-    text: "",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: null,
-    objectName: null,
-    audio: "stimuli/audio/intro/intro_3.mp3"
-  })
-);
-
-
-timeline.push(
-  makeObjectIntroTrial({
-    text: "",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: null,
-    objectName: getJobImagePath(),
-    audio: getJobIntroAudioPath()
+    objectName: "star_berry",
+    audio: getNewIntroAudioPath("intro_star_berry"),
+    scriptText: INTRO_SCRIPT.intro_star_berry
   })
 );
 
 timeline.push(
   makeObjectIntroTrial({
-    text: "",
+    text: "This is an astro tweeter.",
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
-    objectType: null,
-    objectName: "images/telescopes.png",
-    audio: "stimuli/audio/intro/intro_telescopes.mp3"
+    objectType: "target",
+    objectName: "astro_tweeter",
+    audio: getNewIntroAudioPath("intro_astro_tweeter"),
+    scriptText: INTRO_SCRIPT.intro_astro_tweeter
   })
 );
 
-/*timeline.push(
+timeline.push(
   makeObjectIntroTrial({
-    text: "",
+    text: "This is astro leaf.",
     alienColor: GUIDE_ALIEN.color,
     alienNumber: GUIDE_ALIEN.number,
-    objectType: null,
-    objectName: "images/moonball.png",
-    audio: "stimuli/audio/intro/intro_moonball.mp3"
+    objectType: "target",
+    objectName: "astro_leaf",
+    audio: getNewIntroAudioPath("intro_astro_leaf"),
+    scriptText: INTRO_SCRIPT.intro_astro_leaf
   })
-);*/
-
+);
 
 // Game intro depends on condition
 if (speakerCondition === "same_speaker") {
   timeline.push(
     makeGameIntroTrial({
-      text: "",
+      text: `Help ${GUIDE_ALIEN.name} sort the jars.`,
       alienName: GUIDE_ALIEN.name,
       alienColor: GUIDE_ALIEN.color,
       alienNumber: GUIDE_ALIEN.number,
-      audio: getJarsIntroAudio()
+      audio: getJarsIntroAudio(),
+      scriptText: INTRO_SCRIPT.intro_jars_same
     })
   );
 } else {
   timeline.push(
-    makeTwoAlienIntroTrial({
-      text: `${GUIDE_ALIEN.name} says: This is ${TASK_ALIEN.name}. ${TASK_ALIEN.name} is going to show you the jar game.`,
-      leftAlienName: GUIDE_ALIEN.name,
-      leftAlienColor: GUIDE_ALIEN.color,
-      leftAlienNumber: GUIDE_ALIEN.number,
-      rightAlienName: TASK_ALIEN.name,
-      rightAlienColor: TASK_ALIEN.color,
-      rightAlienNumber: TASK_ALIEN.number,
-      audio: "stimuli/audio/intro/intro_new_alien.mp3"
-    })
-  );
-
-  timeline.push(
     makeGameIntroTrial({
-      text: `Hi! I'm ${TASK_ALIEN.name}. Let's play the jar game.`,
+      text: `Help ${TASK_ALIEN.name} sort the jars.`,
       alienName: TASK_ALIEN.name,
       alienColor: TASK_ALIEN.color,
       alienNumber: TASK_ALIEN.number,
-      audio: getJarsIntroAudio()
+      audio: getJarsIntroAudio(),
+      scriptText: INTRO_SCRIPT.intro_jars_new
     })
   );
 }
@@ -3258,10 +3301,8 @@ mixedConfigs.forEach(config => {
 
 timeline.push(makeObjectNamingTrials(objectNamingConfigs));
 
-
 timeline.push(green_job_free_response_trial);
 timeline.push(yellow_job_free_response_trial);
-
 
 timeline.push(save_data_trial);
 timeline.push(prolific_ending_block);
