@@ -55,7 +55,7 @@ function getTimestampID() {
 
 const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`;
 
-const DATAPIPE_EXPERIMENT_ID = "c75gL7GVt3PL";
+const DATAPIPE_EXPERIMENT_ID = "IKloPxNpHRRI";
 
 const ex_version =
   `cloud_${CLOUD_VERSION}__audio_${CRITICAL_AUDIO_VERSION}__job_${JOB_VERSION}__distractors_${DISTRACTOR_VERSION}`;
@@ -182,10 +182,13 @@ const INTRO_SCRIPT = {
   intro_2: `Here is a green alien named Borp. Borp is going to tell you about some of the interesting animals the forest rangers take care of on this planet.`,
   intro_star_poofle: `Hi there, I'm glad you are interested in learning more about some of the animals that live on this planet. First, I'll tell you about the star poofle. Star poofles are very interesting animals. They live in the forest on our planet. They like to run around very quickly, and they can also fly. Can you say star poofle?`,
   intro_star_berry: `Next, I'll tell you about what star poofles love to eat. This is a star berry. Star poofles love to eat star berries. Star berries are sweet fruits that grow on bushes in the forest on our planet. Can you say star berry?`,
+  intro_additional: `Additional item introduction screen.`,
   intro_astro_tweeter: `Here is another animal. This is an astro tweeter. Astro tweeters are also interesting animals, and they live in the forest on our planet too. They live in nests that they build in trees, and they like to fly around. Can you say astro tweeter?`,
   intro_astro_leaf: `Next, I'll tell you about what astro tweeters love to eat. This is astro leaf. Astro tweeters love to eat astro leaf. Astro leaf is a crunchy vegetable that grows in the ground in the forest on our planet. Can you say astro leaf?`,
+  intro_reminder: `Reminder screen after all items are introduced.`,
   intro_jars_same: `Now, you are going to help Borp sort some jars.`,
-  intro_jars_new: `Now, let's meet a new alien. You are going to help this alien sort some jars.`
+  intro_jars_new: `Now, let's meet a new alien. You are going to help this alien sort some jars.`,
+  intro_jar_again: `Jar game reminder before the second jar block.`
 };
 
 
@@ -417,10 +420,13 @@ const AUDIO_PRELOAD = [
   getNewIntroAudioPath("intro_2"),
   getNewIntroAudioPath("intro_star_poofle"),
   getNewIntroAudioPath("intro_star_berry"),
+  getNewIntroAudioPath("intro_additional"),
   getNewIntroAudioPath("intro_astro_tweeter"),
   getNewIntroAudioPath("intro_astro_leaf"),
+  getNewIntroAudioPath("intro_reminder"),
   getNewIntroAudioPath("intro_jars_same"),
   getNewIntroAudioPath("intro_jars_new"),
+  getNewIntroAudioPath("intro_jar_again"),
 
   ...(EXP_CONFIG.useCloud ? [getConditionCloudAudio()] : [])
 ];
@@ -1306,6 +1312,80 @@ function renderCloudIntroScreen({
         <div style="
           position:absolute;
           bottom:4%;
+          left:50%;
+          transform:translateX(-50%);
+          z-index:20;
+        ">
+          <button
+            id="introNextButton"
+            style="
+              font-size:24px;
+              padding:12px 28px;
+              border-radius:12px;
+              cursor:pointer;
+            "
+          >
+            Next →
+          </button>
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
+function renderJobReminderIntroScreen({
+  showNextButton = true
+} = {}) {
+  return `
+    <div style="position:fixed; inset:0; overflow:hidden;">
+      <img
+        src="images/background.png"
+        style="
+          position:absolute;
+          inset:0;
+          width:100%;
+          height:100%;
+          object-fit:cover;
+        "
+      >
+
+      <div style="
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%, -50%);
+        width:min(86vw, 1100px);
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        gap:8vw;
+        z-index:10;
+      ">
+        <img
+          src="images/astronomer.png"
+          style="
+            height:44vh;
+            max-width:40vw;
+            object-fit:contain;
+            display:block;
+          "
+        >
+
+        <img
+          src="images/forest_ranger.png"
+          style="
+            height:44vh;
+            max-width:40vw;
+            object-fit:contain;
+            display:block;
+          "
+        >
+      </div>
+
+      ${showNextButton ? `
+        <div style="
+          position:absolute;
+          bottom:6%;
           left:50%;
           transform:translateX(-50%);
           z-index:20;
@@ -2576,6 +2656,62 @@ function makeCloudIntroTrial({
   };
 }
 
+function makeJobReminderIntroTrial({
+  audio = null,
+  scriptText = INTRO_SCRIPT.intro_reminder
+} = {}) {
+  return {
+    type: jsPsychHtmlKeyboardResponse,
+    choices: "NO_KEYS",
+    stimulus: renderJobReminderIntroScreen({
+      showNextButton: true
+    }),
+    data: {
+      trial_type: "intro_reminder",
+      speaker_condition: speakerCondition,
+      intro_text: scriptText,
+      audio: audio
+    },
+    on_load: function() {
+      setupIntroAudioAndNext(audio);
+    },
+    on_finish: function() {
+      cleanupIntroAudio();
+    }
+  };
+}
+
+function makeAdditionalItemsIntroTrial({
+  audio = null,
+  scriptText = INTRO_SCRIPT.intro_additional
+} = {}) {
+  return {
+    type: jsPsychHtmlKeyboardResponse,
+    choices: "NO_KEYS",
+    stimulus: renderSingleAlienIntroScreen({
+      text: "",
+      alienColor: GUIDE_ALIEN.color,
+      alienNumber: GUIDE_ALIEN.number,
+      showNextButton: true
+    }),
+    data: {
+      trial_type: "intro_additional_items",
+      speaker_condition: speakerCondition,
+      intro_text: scriptText,
+      alien_name: GUIDE_ALIEN.name,
+      alien_color: GUIDE_ALIEN.color,
+      alien_number: GUIDE_ALIEN.number,
+      audio: audio
+    },
+    on_load: function() {
+      setupIntroAudioAndNext(audio);
+    },
+    on_finish: function() {
+      cleanupIntroAudio();
+    }
+  };
+}
+
 
 // ==================================================
 // OBJECT NAMING TRIALS
@@ -2805,29 +2941,39 @@ const {
 const [criticalDistractor1, criticalDistractor2] = DISTRACTOR_OBJECTS;
 
 
-const TEST_TRIAL_SPECS = [
+const STAR_TEST_TRIAL_SPECS = [
   { target: "star_berry", distractor: criticalDistractor1 },
-  { target: "star_poofle", distractor: criticalDistractor2 },
+  { target: "star_poofle", distractor: criticalDistractor2 }
+];
+
+const ASTRO_TEST_TRIAL_SPECS = [
   { target: "astro_tweeter", distractor: criticalDistractor1 },
   { target: "astro_leaf", distractor: criticalDistractor2 }
 ];
 
-const criticalConfigsAll = jsPsych.randomization.shuffle(
-  TEST_TRIAL_SPECS.map(spec =>
+const starCriticalConfigs = jsPsych.randomization.shuffle(
+  STAR_TEST_TRIAL_SPECS.map(spec =>
     buildCriticalConfig(spec.target, spec.distractor, "Choose a jar.")
   )
 );
 
-const firstFillerConfigs = [fillerConfigsBlock1[0]];
+const astroCriticalConfigs = jsPsych.randomization.shuffle(
+  ASTRO_TEST_TRIAL_SPECS.map(spec =>
+    buildCriticalConfig(spec.target, spec.distractor, "Choose a jar.")
+  )
+);
 
-const remainingFillerConfigs = [
-  ...fillerConfigsBlock1.slice(1),
-  ...fillerConfigsBlock2
+const starJarConfigs = [
+  fillerConfigsBlock1[0],
+  ...jsPsych.randomization.shuffle([
+    ...fillerConfigsBlock1.slice(1),
+    ...starCriticalConfigs
+  ])
 ];
 
-const mixedConfigs = jsPsych.randomization.shuffle([
-  ...remainingFillerConfigs,
-  ...criticalConfigsAll
+const astroJarConfigs = jsPsych.randomization.shuffle([
+  ...fillerConfigsBlock2,
+  ...astroCriticalConfigs
 ]);
 
 const objectNamingConfigs = jsPsych.randomization.shuffle([
@@ -3181,6 +3327,116 @@ timeline.push(consent_block);
 timeline.push(volume_check_screen);
 
 
+function pushObjectIntroTrial(objectName) {
+  const introConfigs = {
+    star_poofle: {
+      text: "This is a star poofle.",
+      audioName: "intro_star_poofle",
+      scriptText: INTRO_SCRIPT.intro_star_poofle
+    },
+    star_berry: {
+      text: "This is a star berry.",
+      audioName: "intro_star_berry",
+      scriptText: INTRO_SCRIPT.intro_star_berry
+    },
+    astro_tweeter: {
+      text: "This is an astro tweeter.",
+      audioName: "intro_astro_tweeter",
+      scriptText: INTRO_SCRIPT.intro_astro_tweeter
+    },
+    astro_leaf: {
+      text: "This is astro leaf.",
+      audioName: "intro_astro_leaf",
+      scriptText: INTRO_SCRIPT.intro_astro_leaf
+    }
+  };
+
+  const introConfig = introConfigs[objectName];
+
+  if (!introConfig) {
+    throw new Error(`Missing object intro config for ${objectName}.`);
+  }
+
+  timeline.push(
+    makeObjectIntroTrial({
+      text: introConfig.text,
+      alienColor: GUIDE_ALIEN.color,
+      alienNumber: GUIDE_ALIEN.number,
+      objectType: "target",
+      objectName,
+      audio: getNewIntroAudioPath(introConfig.audioName),
+      scriptText: introConfig.scriptText
+    })
+  );
+}
+
+function pushGameIntroTrial() {
+  if (speakerCondition === "same_speaker") {
+    timeline.push(
+      makeGameIntroTrial({
+        text: `Help ${GUIDE_ALIEN.name} sort the jars.`,
+        alienName: GUIDE_ALIEN.name,
+        alienColor: GUIDE_ALIEN.color,
+        alienNumber: GUIDE_ALIEN.number,
+        audio: getJarsIntroAudio(),
+        scriptText: INTRO_SCRIPT.intro_jars_same
+      })
+    );
+  } else {
+    timeline.push(
+      makeGameIntroTrial({
+        text: `Help ${TASK_ALIEN.name} sort the jars.`,
+        alienName: TASK_ALIEN.name,
+        alienColor: TASK_ALIEN.color,
+        alienNumber: TASK_ALIEN.number,
+        audio: getJarsIntroAudio(),
+        scriptText: INTRO_SCRIPT.intro_jars_new
+      })
+    );
+  }
+}
+
+function pushSecondJarIntroTrial() {
+  timeline.push(
+    makeGameIntroTrial({
+      text: `Help ${TASK_ALIEN.name} sort more jars.`,
+      alienName: TASK_ALIEN.name,
+      alienColor: TASK_ALIEN.color,
+      alienNumber: TASK_ALIEN.number,
+      audio: getNewIntroAudioPath("intro_jar_again"),
+      scriptText: INTRO_SCRIPT.intro_jar_again
+    })
+  );
+}
+
+function pushJarConfigTrials(configs) {
+  configs.forEach(config => {
+    if (config.phase === "critical") {
+      timeline.push(makeCriticalTrials([config]));
+    } else {
+      timeline.push(makeFillerTrials([config]));
+    }
+  });
+}
+
+function pushJobReminderIntroTrial() {
+  timeline.push(
+    makeJobReminderIntroTrial({
+      audio: getNewIntroAudioPath("intro_reminder"),
+      scriptText: INTRO_SCRIPT.intro_reminder
+    })
+  );
+}
+
+function pushAdditionalItemsIntroTrial() {
+  timeline.push(
+    makeAdditionalItemsIntroTrial({
+      audio: getNewIntroAudioPath("intro_additional"),
+      scriptText: INTRO_SCRIPT.intro_additional
+    })
+  );
+}
+
 // Intro sequence
 timeline.push(
   makeAllAliensIntroTrial(
@@ -3222,79 +3478,10 @@ timeline.push(
   )
 );
 
-timeline.push(
-  makeObjectIntroTrial({
-    text: "This is a star poofle.",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: "target",
-    objectName: "star_poofle",
-    audio: getNewIntroAudioPath("intro_star_poofle"),
-    scriptText: INTRO_SCRIPT.intro_star_poofle
-  })
-);
-
-timeline.push(
-  makeObjectIntroTrial({
-    text: "This is a star berry.",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: "target",
-    objectName: "star_berry",
-    audio: getNewIntroAudioPath("intro_star_berry"),
-    scriptText: INTRO_SCRIPT.intro_star_berry
-  })
-);
-
-timeline.push(
-  makeObjectIntroTrial({
-    text: "This is an astro tweeter.",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: "target",
-    objectName: "astro_tweeter",
-    audio: getNewIntroAudioPath("intro_astro_tweeter"),
-    scriptText: INTRO_SCRIPT.intro_astro_tweeter
-  })
-);
-
-timeline.push(
-  makeObjectIntroTrial({
-    text: "This is astro leaf.",
-    alienColor: GUIDE_ALIEN.color,
-    alienNumber: GUIDE_ALIEN.number,
-    objectType: "target",
-    objectName: "astro_leaf",
-    audio: getNewIntroAudioPath("intro_astro_leaf"),
-    scriptText: INTRO_SCRIPT.intro_astro_leaf
-  })
-);
-
-// Game intro depends on condition
-if (speakerCondition === "same_speaker") {
-  timeline.push(
-    makeGameIntroTrial({
-      text: `Help ${GUIDE_ALIEN.name} sort the jars.`,
-      alienName: GUIDE_ALIEN.name,
-      alienColor: GUIDE_ALIEN.color,
-      alienNumber: GUIDE_ALIEN.number,
-      audio: getJarsIntroAudio(),
-      scriptText: INTRO_SCRIPT.intro_jars_same
-    })
-  );
-} else {
-  timeline.push(
-    makeGameIntroTrial({
-      text: `Help ${TASK_ALIEN.name} sort the jars.`,
-      alienName: TASK_ALIEN.name,
-      alienColor: TASK_ALIEN.color,
-      alienNumber: TASK_ALIEN.number,
-      audio: getJarsIntroAudio(),
-      scriptText: INTRO_SCRIPT.intro_jars_new
-    })
-  );
-}
-
+pushObjectIntroTrial("star_poofle");
+pushObjectIntroTrial("star_berry");
+pushJobReminderIntroTrial();
+pushGameIntroTrial();
 
 timeline.push(makePracticeTrials(practiceConfigs));
 
@@ -3309,18 +3496,14 @@ if (EXP_CONFIG.useCloud) {
   );
 }
 
+pushJarConfigTrials(starJarConfigs);
 
-// At least one filler first
-timeline.push(makeFillerTrials(firstFillerConfigs));
-
-// Then randomize remaining fillers + all critical trials
-mixedConfigs.forEach(config => {
-  if (config.phase === "critical") {
-    timeline.push(makeCriticalTrials([config]));
-  } else {
-    timeline.push(makeFillerTrials([config]));
-  }
-});
+pushAdditionalItemsIntroTrial();
+pushObjectIntroTrial("astro_tweeter");
+pushObjectIntroTrial("astro_leaf");
+pushJobReminderIntroTrial();
+pushSecondJarIntroTrial();
+pushJarConfigTrials(astroJarConfigs);
 
 timeline.push(makeObjectNamingTrials(objectNamingConfigs));
 
