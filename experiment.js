@@ -55,7 +55,7 @@ function getTimestampID() {
 
 const participantID = `${getTimestampID()}_${jsPsych.randomization.randomID(4)}`;
 
-const DATAPIPE_EXPERIMENT_ID = "IKloPxNpHRRI";
+const DATAPIPE_EXPERIMENT_ID = "mCu9AWhCj2Bh";
 
 const ex_version =
   `cloud_${CLOUD_VERSION}__audio_${CRITICAL_AUDIO_VERSION}__job_${JOB_VERSION}__distractors_${DISTRACTOR_VERSION}`;
@@ -2176,7 +2176,8 @@ function makeFillerTrials(configList) {
             targetObject: jsPsych.timelineVariable("targetObject"),
             audio: jsPsych.timelineVariable("audio"),
             cloudCoveredSide: jsPsych.timelineVariable("cloudCoveredSide"),
-            cloudCoveredJar: jsPsych.timelineVariable("cloudCoveredJar")
+            cloudCoveredJar: jsPsych.timelineVariable("cloudCoveredJar"),
+            fillerTargetCovered: jsPsych.timelineVariable("fillerTargetCovered")
           };
         },
 
@@ -2233,6 +2234,8 @@ function makeFillerTrials(configList) {
 // CRITICAL TRIALS
 // ==================================================
 function makeCriticalTrials(configList) {
+  const singleConfig = configList.length === 1 ? configList[0] : null;
+
   return {
     timeline: [
       {
@@ -2282,7 +2285,7 @@ function makeCriticalTrials(configList) {
         on_load: function() {
           const leftBtn = document.getElementById("leftChoice");
           const rightBtn = document.getElementById("rightChoice");
-          const audioFile = jsPsych.timelineVariable("audio");
+          const audioFile = singleConfig ? singleConfig.audio : jsPsych.timelineVariable("audio");
 
           let currentAudio = playTrialAudio(audioFile);
           let jarChoiceSide = null;
@@ -2294,12 +2297,15 @@ function makeCriticalTrials(configList) {
           }
 
           function finishCriticalTrial(certaintyDirection, certaintyStrength) {
-            const targetSide = jsPsych.timelineVariable("targetSide");
+            const currentTrial = jsPsych.getCurrentTrial ? jsPsych.getCurrentTrial() : {};
+            const currentTrialData = currentTrial.data || {};
+            const resolvedTrialData = singleConfig || currentTrialData;
+            const targetSide = resolvedTrialData.targetSide || jsPsych.timelineVariable("targetSide");
 
             const chosenObject =
               jarChoiceSide === "left"
-                ? jsPsych.timelineVariable("leftObject")
-                : jsPsych.timelineVariable("rightObject");
+                ? resolvedTrialData.leftObject || jsPsych.timelineVariable("leftObject")
+                : resolvedTrialData.rightObject || jsPsych.timelineVariable("rightObject");
 
             const isTargetChoice = jarChoiceSide === targetSide;
 
@@ -2942,8 +2948,8 @@ const [criticalDistractor1, criticalDistractor2] = DISTRACTOR_OBJECTS;
 
 
 const STAR_TEST_TRIAL_SPECS = [
-  { target: "star_berry", distractor: criticalDistractor1 },
-  { target: "star_poofle", distractor: criticalDistractor2 }
+  { target: "star_poofle", distractor: criticalDistractor2 },
+  { target: "star_berry", distractor: criticalDistractor1 }
 ];
 
 const ASTRO_TEST_TRIAL_SPECS = [
@@ -2951,65 +2957,66 @@ const ASTRO_TEST_TRIAL_SPECS = [
   { target: "astro_leaf", distractor: criticalDistractor2 }
 ];
 
-const starCriticalConfigs = jsPsych.randomization.shuffle(
-  STAR_TEST_TRIAL_SPECS.map(spec =>
-    buildCriticalConfig(spec.target, spec.distractor, "Choose a jar.")
-  )
-);
-
-const astroCriticalConfigs = jsPsych.randomization.shuffle(
-  ASTRO_TEST_TRIAL_SPECS.map(spec =>
-    buildCriticalConfig(spec.target, spec.distractor, "Choose a jar.")
-  )
-);
-
-const starJarConfigs = [
-  fillerConfigsBlock1[0],
-  ...jsPsych.randomization.shuffle([
-    ...fillerConfigsBlock1.slice(1),
-    ...starCriticalConfigs
-  ])
+const MINI_JAR_BLOCK_SPECS = [
+  ...STAR_TEST_TRIAL_SPECS,
+  ...ASTRO_TEST_TRIAL_SPECS
 ];
 
-const astroJarConfigs = jsPsych.randomization.shuffle([
-  ...fillerConfigsBlock2,
-  ...astroCriticalConfigs
-]);
+const miniJarBaseFillerConfigs = [
+  ...fillerConfigsBlock1,
+  ...fillerConfigsBlock2
+];
 
-const objectNamingConfigs = jsPsych.randomization.shuffle([
-  {
+const MINI_JAR_FILLER_CONFIGS = MINI_JAR_BLOCK_SPECS.map((spec, index) => {
+  const coveredBaseConfig =
+    miniJarBaseFillerConfigs[(index * 2) % miniJarBaseFillerConfigs.length];
+  const uncoveredBaseConfig =
+    miniJarBaseFillerConfigs[(index * 2 + 1) % miniJarBaseFillerConfigs.length];
+
+  return [
+    buildFillerConfigWithTargetCoverage(coveredBaseConfig, true),
+    buildFillerConfigWithTargetCoverage(uncoveredBaseConfig, false)
+  ];
+});
+
+const miniJarBlocks = MINI_JAR_BLOCK_SPECS.map((spec, index) => {
+  return {
+    objectName: spec.target,
+    fillerConfigs: MINI_JAR_FILLER_CONFIGS[index],
+    criticalConfig: buildCriticalConfig(
+      spec.target,
+      spec.distractor,
+      "Choose a jar.",
+      index + 1
+    ),
+    objectNamingConfig: buildObjectNamingConfig(spec.target)
+  };
+});
+
+function buildFillerConfigWithTargetCoverage(baseConfig, targetCovered) {
+  const coveredSide = baseConfig.cloudCoveredSide || fixedCloudCoveredSide;
+  const targetSide = targetCovered ? coveredSide : getOtherSide(coveredSide);
+  const targetObject =
+    targetSide === "left" ? baseConfig.leftObject : baseConfig.rightObject;
+
+  return {
+    ...baseConfig,
+    targetObject,
+    audio: getFillerAudioSrc(targetObject),
+    fillerTargetCovered: targetCovered
+  };
+}
+
+function buildObjectNamingConfig(objectName) {
+  return {
     alienId: TASK_ALIEN.id,
     alienName: TASK_ALIEN.name,
     alienColor: TASK_ALIEN.color,
     alienNumber: TASK_ALIEN.number,
     objectType: "target",
-    objectName: "star_berry"
-  },
-  {
-    alienId: TASK_ALIEN.id,
-    alienName: TASK_ALIEN.name,
-    alienColor: TASK_ALIEN.color,
-    alienNumber: TASK_ALIEN.number,
-    objectType: "target",
-    objectName: "star_poofle"
-  },
-  {
-    alienId: TASK_ALIEN.id,
-    alienName: TASK_ALIEN.name,
-    alienColor: TASK_ALIEN.color,
-    alienNumber: TASK_ALIEN.number,
-    objectType: "target",
-    objectName: "astro_tweeter"
-  },
-  {
-    alienId: TASK_ALIEN.id,
-    alienName: TASK_ALIEN.name,
-    alienColor: TASK_ALIEN.color,
-    alienNumber: TASK_ALIEN.number,
-    objectType: "target",
-    objectName: "astro_leaf"
-  }
-]);
+    objectName
+  };
+}
 
 
 // ==================================================
@@ -3419,6 +3426,23 @@ function pushJarConfigTrials(configs) {
   });
 }
 
+function pushMiniJarBlock(block, { showAdditionalIntro = true, showJarAgainIntro = true } = {}) {
+  if (showAdditionalIntro) {
+    pushAdditionalItemsIntroTrial();
+  }
+
+  pushObjectIntroTrial(block.objectName);
+  pushJobReminderIntroTrial();
+
+  if (showJarAgainIntro) {
+    pushSecondJarIntroTrial();
+  }
+
+  timeline.push(makeFillerTrials(block.fillerConfigs));
+  timeline.push(makeCriticalTrials([block.criticalConfig]));
+  timeline.push(makeObjectNamingTrials([block.objectNamingConfig]));
+}
+
 function pushJobReminderIntroTrial() {
   timeline.push(
     makeJobReminderIntroTrial({
@@ -3478,12 +3502,11 @@ timeline.push(
   )
 );
 
-pushObjectIntroTrial("star_poofle");
-pushObjectIntroTrial("star_berry");
+pushObjectIntroTrial(miniJarBlocks[0].objectName);
 pushJobReminderIntroTrial();
 pushGameIntroTrial();
 
-timeline.push(makePracticeTrials(practiceConfigs));
+timeline.push(makePracticeTrials([practiceConfigs[0]]));
 
 if (EXP_CONFIG.useCloud) {
   timeline.push(
@@ -3496,16 +3519,13 @@ if (EXP_CONFIG.useCloud) {
   );
 }
 
-pushJarConfigTrials(starJarConfigs);
+timeline.push(makeFillerTrials(miniJarBlocks[0].fillerConfigs));
+timeline.push(makeCriticalTrials([miniJarBlocks[0].criticalConfig]));
+timeline.push(makeObjectNamingTrials([miniJarBlocks[0].objectNamingConfig]));
 
-pushAdditionalItemsIntroTrial();
-pushObjectIntroTrial("astro_tweeter");
-pushObjectIntroTrial("astro_leaf");
-pushJobReminderIntroTrial();
-pushSecondJarIntroTrial();
-pushJarConfigTrials(astroJarConfigs);
-
-timeline.push(makeObjectNamingTrials(objectNamingConfigs));
+pushMiniJarBlock(miniJarBlocks[1]);
+pushMiniJarBlock(miniJarBlocks[2]);
+pushMiniJarBlock(miniJarBlocks[3]);
 
 timeline.push(green_job_free_response_trial);
 timeline.push(yellow_job_free_response_trial);
