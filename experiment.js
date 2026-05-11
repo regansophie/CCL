@@ -1732,7 +1732,6 @@ function renderObjectNamingScreen({
   objectType = null,
   objectName = null
 } = {}) {
-  const alienSrc = getAlienSrc(alienColor, alienNumber);
   const objectSrc = getObjectSrc(objectType, objectName);
 
   return `
@@ -1829,21 +1828,6 @@ function renderObjectNamingScreen({
         </button>
       </div>
 
-      <div style="
-        position:absolute;
-        left:6%;
-        bottom:14%;
-        z-index:10;
-      ">
-        <img
-          src="${alienSrc}"
-          style="
-            height:${ALIEN_HEIGHT};
-            object-fit:contain;
-            display:block;
-          "
-        >
-      </div>
     </div>
   `;
 }
